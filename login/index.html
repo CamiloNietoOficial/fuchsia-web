@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Iniciar sesión — Fuchsia</title>
+<link rel="icon" href="/assets/img/fuchsia-fuchsia-logo.jpeg">
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;900&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/css/styles.css">
+</head>
+<body>
+<script src="/assets/partials.js"></script>
+
+<section class="hero" style="padding-top:120px">
+  <div class="container" style="max-width:420px">
+    <h1 style="text-align:center">Iniciar sesión</h1>
+
+    <form class="elegant" id="form-login">
+      <div><label>Correo</label><input name="email" type="email" required></div>
+      <div><label>Contraseña</label><input name="password" type="password" required></div>
+      <button type="submit" class="btn">Entrar</button>
+      <p style="text-align:right"><a href="#" id="link-recuperar" style="font-size:.85rem;color:var(--gris)">¿Olvidaste tu contraseña?</a></p>
+      <p id="login-msg" style="color:var(--gris);font-size:.85rem"></p>
+    </form>
+
+    <button id="btn-google" class="btn ghost" style="width:100%;margin-top:14px">Continuar con Google</button>
+
+    <p style="text-align:center;margin-top:24px;color:var(--gris)">¿No tienes cuenta? <a href="#" id="link-registro" style="color:var(--fucsia-claro)">Regístrate</a></p>
+
+    <form class="elegant" id="form-registro" style="display:none">
+      <div><label>Nombre completo *</label><input name="nombre" required></div>
+      <div><label>Correo *</label><input name="email" type="email" required></div>
+      <div><label>Celular *</label><input name="telefono" type="tel" required></div>
+      <div><label>Contraseña *</label><input name="password" type="password" required minlength="6"></div>
+      <label style="display:flex;gap:8px;align-items:flex-start">
+        <input type="checkbox" name="acepto" required style="width:auto">
+        <span>Acepto el tratamiento de mis datos personales (Habeas Data, Ley 1581/2012).</span>
+      </label>
+      <button type="submit" class="btn">Crear cuenta</button>
+      <p id="registro-msg" style="color:var(--gris);font-size:.85rem"></p>
+    </form>
+  </div>
+</section>
+
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script src="/assets/js/config.js"></script>
+<script src="/assets/js/supabase-init.js"></script>
+<script src="/assets/js/auth.js"></script>
+<script>
+const params = new URLSearchParams(location.search);
+const next = params.get('next') || '/';
+
+document.getElementById('link-registro').addEventListener('click', (e) => {
+  e.preventDefault();
+  document.getElementById('form-login').style.display = 'none';
+  document.getElementById('form-registro').style.display = 'grid';
+});
+
+document.getElementById('form-login').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const fd = new FormData(e.target);
+  const { error } = await window.FUCHSIA.iniciarSesion(fd.get('email'), fd.get('password'));
+  document.getElementById('login-msg').textContent = error ? window.FUCHSIA.traducirError(error.message) : '';
+  if (!error) location.href = next;
+});
+
+document.getElementById('link-recuperar').addEventListener('click', async (e) => {
+  e.preventDefault();
+  const email = document.querySelector('#form-login [name=email]').value;
+  if (!email) { document.getElementById('login-msg').textContent = 'Escribe tu correo primero.'; return; }
+  await window.FUCHSIA.recuperarPassword(email);
+  document.getElementById('login-msg').textContent = 'Te enviamos un correo para recuperar tu contraseña.';
+});
+
+document.getElementById('btn-google').addEventListener('click', () => window.FUCHSIA.iniciarConGoogle());
+
+document.getElementById('form-registro').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const fd = new FormData(e.target);
+  const { error } = await window.FUCHSIA.registrar(fd.get('email'), fd.get('password'), fd.get('nombre'), fd.get('telefono'));
+  document.getElementById('registro-msg').textContent = error ? window.FUCHSIA.traducirError(error.message) : '¡Cuenta creada! Ya puedes iniciar sesión.';
+});
+</script>
+<script src="/assets/js/main.js"></script>
+</body>
+</html>

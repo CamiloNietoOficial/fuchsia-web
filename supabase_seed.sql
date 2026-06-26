@@ -1,0 +1,20 @@
+-- Seed historico: talleres y masterclasses ya realizados (Fuchsia / Empowerd)
+-- Generado por build_fuchsia.py -- ejecutar despues de fuchsia_schema.sql
+
+insert into public.talleres (slug, titulo, foco, modalidad, imagen_url, estado, video_url) values ('lanzamiento-fuchsia', 'Lanzamiento Fuchsia', 'Lanzamiento', 'virtual', 'https://fuchsia.com.co/assets/img/fuchsia-lanzamiento-fuchsia.jpeg', 'pasado', 'https://www.instagram.com/reel/DVEQi9kkddh/');
+insert into public.talleres (slug, titulo, foco, modalidad, imagen_url, estado, video_url) values ('activa-tu-nueva-version', 'Activa tu nueva versión', 'Crecimiento Personal', 'virtual', 'https://fuchsia.com.co/assets/img/fuchsia-activa-tu-nueva-version.jpeg', 'pasado', 'https://www.instagram.com/reel/DV7E0DOEeAV/');
+insert into public.talleres (slug, titulo, foco, modalidad, imagen_url, estado, video_url) values ('de-emprendedor-a-empresario', 'De emprendedor a empresario', 'Finanzas y Negocios', 'virtual', 'https://fuchsia.com.co/assets/img/fuchsia-de-emprendedor-a-empresario.jpeg', 'pasado', 'https://www.instagram.com/reel/DXmf80lEdVw/');
+insert into public.talleres (slug, titulo, foco, modalidad, imagen_url, estado, video_url) values ('intencion-vision-y-accion', 'Intención, visión y acción', 'Desarrollo Profesional', 'virtual', 'https://fuchsia.com.co/assets/img/fuchsia-intencion-vision-y-accion.jpeg', 'pasado', 'https://vt.tiktok.com/ZSCj9HwRV/');
+
+insert into public.masterclasses (titulo, imagen_url, estado, video_url) values ('Qué es Empowerd', NULL, 'pasada', 'https://vt.tiktok.com/ZSCj9H5CY/');
+insert into public.masterclasses (titulo, imagen_url, estado, video_url) values ('Amor propio y belleza: el éxito desde adentro', https://fuchsia.com.co/assets/img/empowerd-amor-propio-y-belleza-el-exito-desde-adentro.jpeg, 'pasada', NULL);
+insert into public.masterclasses (titulo, imagen_url, estado, video_url) values ('Cómo amar a un adicto sin perderte a ti misma', https://fuchsia.com.co/assets/img/empowerd-como-amar-a-un-adicto-sin-perderte-a-ti-mismo.jpeg, 'pasada', NULL);
+insert into public.masterclasses (titulo, imagen_url, estado, video_url) values ('De emprendedor a empresario', https://fuchsia.com.co/assets/img/empowerd-de-emprendedor-a-empresario.jpeg, 'pasada', NULL);
+insert into public.masterclasses (titulo, imagen_url, estado, video_url) values ('Decodifica tu cuerpo', https://fuchsia.com.co/assets/img/empowerd-decodifica-tu-cuerpo.jpeg, 'pasada', NULL);
+insert into public.masterclasses (titulo, imagen_url, estado, video_url) values ('El poder de la observación y la acción', https://fuchsia.com.co/assets/img/empowerd-el-poder-de-la-observacion-y-la-accion.jpeg, 'pasada', NULL);
+insert into public.masterclasses (titulo, imagen_url, estado, video_url) values ('IA para todos', https://fuchsia.com.co/assets/img/empowerd-ia-para-todos.jpeg, 'pasada', NULL);
+insert into public.masterclasses (titulo, imagen_url, estado, video_url) values ('Lo que dices de ti se convierte en lo que ves', https://fuchsia.com.co/assets/img/empowerd-lo-que-dices-de-ti-se-convierte-en-lo-que-ves.jpeg, 'pasada', NULL);
+insert into public.masterclasses (titulo, imagen_url, estado, video_url) values ('Master Class de maquillaje', https://fuchsia.com.co/assets/img/empowerd-master-class-de-maquillaje.jpeg, 'pasada', NULL);
+insert into public.masterclasses (titulo, imagen_url, estado, video_url) values ('Regulación de cuota alimentaria y visitas', https://fuchsia.com.co/assets/img/empowerd-regulacion-de-cuota-alimentaria-y-visitas.jpeg, 'pasada', NULL);
+insert into public.masterclasses (titulo, imagen_url, estado, video_url) values ('Sabías que la forma de tu cuerpo dice cómo funciona tu mente y revela los talentos que tienes', https://fuchsia.com.co/assets/img/empowerd-sabias-que-la-forma-de-tu-cuerpo-dice-como-funciona-tu-mente-y-revela-los-talentos-que-tienes.jpeg, 'pasada', NULL);
+insert into public.masterclasses (titulo, imagen_url, estado, video_url) values ('Suficiente: el arte de crecer sin perderte', https://fuchsia.com.co/assets/img/empowerd-suficiente-el-arte-de-crecer-sin-perderte.jpeg, 'pasada', NULL);

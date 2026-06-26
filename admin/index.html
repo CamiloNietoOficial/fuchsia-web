@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — Fuchsia</title>
+<link rel="icon" href="/assets/img/fuchsia-fuchsia-logo.jpeg">
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;900&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/css/styles.css">
+<style>
+  table{width:100%;border-collapse:collapse;margin-top:20px}
+  th,td{padding:10px 8px;text-align:left;border-bottom:1px solid rgba(255,255,255,.08);font-size:.88rem}
+  .tabs{display:flex;gap:10px;margin-bottom:20px}
+  .tabs button{padding:.6em 1.4em;border-radius:99px;border:1px solid rgba(255,255,255,.2);background:transparent;color:#fff;cursor:pointer;font-family:var(--font-display);font-size:.82rem}
+  .tabs button.active{background:linear-gradient(135deg,var(--fucsia),var(--fucsia-claro));border-color:transparent}
+  .panel{display:none}
+  .panel.active{display:block}
+  .campo-row{display:flex;gap:8px;align-items:flex-end}
+</style>
+</head>
+<body>
+<script src="/assets/partials.js"></script>
+
+<section class="hero" style="padding:120px 0 30px">
+  <div class="container">
+    <h1>Panel de administración</h1>
+    <p class="lead" style="margin:0 auto">Crea y gestiona los talleres de Fuchsia y las masterclasses de Empowerd Mujer.</p>
+  </div>
+</section>
+
+<section style="padding-top:0">
+  <div class="container">
+    <div class="tabs">
+      <button data-tab="talleres" class="active">Talleres</button>
+      <button data-tab="masterclasses">Masterclasses</button>
+    </div>
+
+    <div class="panel active" id="panel-talleres">
+      <h2>Nuevo taller</h2>
+      <form class="elegant" id="form-taller">
+        <div><label>Título *</label><input name="titulo" required></div>
+        <div><label>Slug (URL) *</label><input name="slug" required placeholder="ej: taller-de-finanzas"></div>
+        <div><label>Foco</label>
+          <select name="foco">
+            <option>Finanzas y Negocios</option><option>Crecimiento Personal</option>
+            <option>Desarrollo Profesional</option><option>Imagen y Liderazgo</option>
+          </select>
+        </div>
+        <div><label>Modalidad</label>
+          <select name="modalidad"><option value="virtual">Virtual</option><option value="presencial">Presencial</option></select>
+        </div>
+        <div><label>Descripción</label><textarea name="descripcion" rows="3"></textarea></div>
+        <div><label>Imagen</label><input type="file" name="imagen" accept="image/*"></div>
+        <div><label>Fecha del taller</label><input type="date" name="fecha_taller"></div>
+        <div><label>Fecha límite de preventa</label><input type="date" name="fecha_limite_preventa"></div>
+        <div><label>Link de pago preventa (Wompi/Nequi)</label><input name="link_pago_preventa"></div>
+        <div><label>Link de pago regular (Wompi/Nequi)</label><input name="link_pago_regular"></div>
+        <div>
+          <label>Campos del formulario de inscripción</label>
+          <div id="campos-lista"></div>
+          <button type="button" class="btn ghost" id="btn-add-campo" style="margin-top:8px">+ Añadir campo</button>
+        </div>
+        <div><label>Estado</label>
+          <select name="estado"><option value="proximo">Próximo</option><option value="pasado">Pasado</option><option value="desactivado">Desactivado</option></select>
+        </div>
+        <button type="submit" class="btn">Crear taller</button>
+        <p id="taller-msg" style="color:var(--gris)"></p>
+      </form>
+
+      <h2 style="margin-top:50px">Talleres existentes</h2>
+      <table><thead><tr><th>Título</th><th>Foco</th><th>Estado</th><th>Acción</th></tr></thead><tbody id="tabla-talleres"></tbody></table>
+    </div>
+
+    <div class="panel" id="panel-masterclasses">
+      <h2>Nueva masterclass</h2>
+      <form class="elegant" id="form-mc">
+        <div><label>Título *</label><input name="titulo" required></div>
+        <div><label>Imagen</label><input type="file" name="imagen" accept="image/*"></div>
+        <div><label>Fecha (martes)</label><input type="date" name="fecha"></div>
+        <div><label>Estado</label><select name="estado"><option value="proxima">Próxima</option><option value="pasada">Pasada</option></select></div>
+        <button type="submit" class="btn">Crear masterclass</button>
+        <p id="mc-msg" style="color:var(--gris)"></p>
+      </form>
+
+      <h2 style="margin-top:50px">Masterclasses existentes</h2>
+      <table><thead><tr><th>Título</th><th>Estado</th><th>Acción</th></tr></thead><tbody id="tabla-mc"></tbody></table>
+    </div>
+  </div>
+</section>
+
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script src="/assets/js/config.js"></script>
+<script src="/assets/js/supabase-init.js"></script>
+<script src="/assets/js/auth.js"></script>
+<script src="/assets/js/admin.js"></script>
+<script>
+let campos = [{name:'nombre',label:'Nombre completo',type:'text',required:true},{name:'celular',label:'Celular',type:'tel',required:true}];
+
+function renderCampos(){
+  document.getElementById('campos-lista').innerHTML = campos.map((c,i) => `
+    <div class="campo-row">
+      <input data-i="${i}" data-k="label" value="${c.label}" placeholder="Etiqueta" style="flex:1">
+      <input data-i="${i}" data-k="name" value="${c.name}" placeholder="nombre_campo" style="flex:1">
+      <select data-i="${i}" data-k="type" style="flex:1">
+        <option value="text" ${c.type==='text'?'selected':''}>Texto</option>
+        <option value="tel" ${c.type==='tel'?'selected':''}>Teléfono</option>
+        <option value="email" ${c.type==='email'?'selected':''}>Correo</option>
+        <option value="number" ${c.type==='number'?'selected':''}>Número</option>
+      </select>
+      <button type="button" data-del="${i}" class="btn ghost" style="padding:.5em 1em">x</button>
+    </div>`).join('');
+  document.querySelectorAll('#campos-lista input,#campos-lista select').forEach(el => {
+    el.addEventListener('input', () => { campos[el.dataset.i][el.dataset.k] = el.value; });
+  });
+  document.querySelectorAll('[data-del]').forEach(b => b.addEventListener('click', () => { campos.splice(b.dataset.del,1); renderCampos(); }));
+}
+renderCampos();
+document.getElementById('btn-add-campo').addEventListener('click', () => { campos.push({name:'',label:'',type:'text',required:false}); renderCampos(); });
+
+document.querySelectorAll('.tabs button').forEach(b => b.addEventListener('click', () => {
+  document.querySelectorAll('.tabs button').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active');
+  document.getElementById('panel-'+b.dataset.tab).classList.add('active');
+}));
+
+async function listarTalleres(){
+  const { data } = await window.FUCHSIA_SB.from('talleres').select('*').order('id', {ascending:false});
+  document.getElementById('tabla-talleres').innerHTML = (data||[]).map(t => `
+    <tr><td>${t.titulo}</td><td>${t.foco||''}</td><td>${t.estado}</td>
+    <td><button data-id="${t.id}" class="btn-del-taller btn ghost" style="padding:.4em 1em">Borrar</button></td></tr>`).join('');
+  document.querySelectorAll('.btn-del-taller').forEach(b => b.addEventListener('click', async () => {
+    await window.FUCHSIA_SB.from('talleres').delete().eq('id', b.dataset.id); listarTalleres();
+  }));
+}
+
+async function listarMc(){
+  const { data } = await window.FUCHSIA_SB.from('masterclasses').select('*').order('id', {ascending:false});
+  document.getElementById('tabla-mc').innerHTML = (data||[]).map(m => `
+    <tr><td>${m.titulo}</td><td>${m.estado}</td>
+    <td><button data-id="${m.id}" class="btn-del-mc btn ghost" style="padding:.4em 1em">Borrar</button></td></tr>`).join('');
+  document.querySelectorAll('.btn-del-mc').forEach(b => b.addEventListener('click', async () => {
+    await window.FUCHSIA_SB.from('masterclasses').delete().eq('id', b.dataset.id); listarMc();
+  }));
+}
+
+document.getElementById('form-taller').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const fd = new FormData(e.target);
+  let imagen_url = null;
+  const file = fd.get('imagen');
+  if (file && file.size) imagen_url = await window.FUCHSIA.subirImagen(file);
+  const payload = {
+    titulo: fd.get('titulo'), slug: fd.get('slug'), foco: fd.get('foco'), modalidad: fd.get('modalidad'),
+    descripcion: fd.get('descripcion'), fecha_taller: fd.get('fecha_taller') || null,
+    fecha_limite_preventa: fd.get('fecha_limite_preventa') || null,
+    link_pago_preventa: fd.get('link_pago_preventa'), link_pago_regular: fd.get('link_pago_regular'),
+    estado: fd.get('estado'), campos_inscripcion: campos,
+  };
+  if (imagen_url) payload.imagen_url = imagen_url;
+  const { error } = await window.FUCHSIA_SB.from('talleres').insert(payload);
+  document.getElementById('taller-msg').textContent = error ? error.message : 'Taller creado.';
+  if (!error) { e.target.reset(); listarTalleres(); }
+});
+
+document.getElementById('form-mc').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const fd = new FormData(e.target);
+  let imagen_url = null;
+  const file = fd.get('imagen');
+  if (file && file.size) imagen_url = await window.FUCHSIA.subirImagen(file);
+  const payload = { titulo: fd.get('titulo'), fecha: fd.get('fecha') || null, estado: fd.get('estado') };
+  if (imagen_url) payload.imagen_url = imagen_url;
+  const { error } = await window.FUCHSIA_SB.from('masterclasses').insert(payload);
+  document.getElementById('mc-msg').textContent = error ? error.message : 'Masterclass creada.';
+  if (!error) { e.target.reset(); listarMc(); }
+});
+
+(async () => {
+  const session = await window.FUCHSIA.requireAdmin();
+  if (!session) return;
+  listarTalleres(); listarMc();
+})();
+</script>
+<script src="/assets/js/main.js"></script>
+</body>
+</html>

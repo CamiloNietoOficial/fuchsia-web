@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Empowerd Mujer — Gratis | Fuchsia</title>
+<meta name="description" content="Empowerd Mujer: masterclasses 100% gratuitas todos los martes a las 7:30 p.m. Belleza, finanzas, autoestima y más.">
+<link rel="icon" href="/assets/img/empowerd-logo-empowerd.jpeg">
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;900&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/css/styles.css">
+</head>
+<body>
+<script src="/assets/partials.js"></script>
+
+<section class="hero" style="padding-top:120px">
+  <div class="container">
+    <img src="/assets/img/empowerd-logo-empowerd.jpeg" alt="Empowerd Mujer" class="logo-hero" style="border-radius:20px">
+    <span class="gratis" style="margin-bottom:1em">100% Gratis</span>
+    <h1>Empowerd Mujer</h1>
+    <p class="lead">Masterclasses gratuitas todos los <strong>martes a las 7:30 p.m.</strong> Un espacio para crecer sin costo, siempre.</p>
+    <div class="cta-row">
+      <a id="btn-wa-link" class="btn whatsapp" target="_blank" rel="noopener">Pedir el link por WhatsApp</a>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <div class="section-title reveal">
+      <h2>Qué es Empowerd</h2>
+    </div>
+    <div class="video-embed reveal">
+      <blockquote class="tiktok-embed" cite="https://vt.tiktok.com/ZSCj9H5CY/" data-video-id="" style="max-width:320px;min-width:280px"><section></section></blockquote>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <div class="section-title left reveal"><h2>Próximas masterclass <span class="gratis">Gratis</span></h2></div>
+    <div class="grid cols-3" id="proximas-grid"><p>Cargando...</p></div>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <div class="section-title left reveal"><h2>Masterclass anteriores</h2></div>
+    <div class="grid cols-3" id="pasadas-grid"><p>Cargando...</p></div>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <div class="section-title reveal"><h2>Encuentros, actividades y testimonios</h2></div>
+    <div class="grid cols-3" id="tiktoks-grid"></div>
+  </div>
+</section>
+
+<script src="https://www.tiktok.com/embed.js" async></script>
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script src="/assets/js/config.js"></script>
+<script src="/assets/js/supabase-init.js"></script>
+<script src="/assets/js/masterclasses.js"></script>
+<script>
+document.getElementById('btn-wa-link').href = `https://wa.me/${window.FUCHSIA_WHATSAPP_EMPOWERD}?text=${encodeURIComponent('Hola, quiero el link de la próxima masterclass gratuita de Empowerd Mujer')}`;
+
+const tiktoks = [
+  "https://vt.tiktok.com/ZSCj9pnKD/","https://vt.tiktok.com/ZSCj9WT8F/","https://vt.tiktok.com/ZSCjxmTj3/",
+  "https://vt.tiktok.com/ZSCj9nq9g/",
+  "https://vt.tiktok.com/ZSCj93gjc/","https://vt.tiktok.com/ZSCjx4vhS/","https://vt.tiktok.com/ZSCjxn6A6/","https://vt.tiktok.com/ZSCjxnXrU/","https://vt.tiktok.com/ZSCjQdvV8/"
+];
+document.getElementById('tiktoks-grid').innerHTML = tiktoks.map(u => `
+  <div class="video-embed reveal"><blockquote class="tiktok-embed" cite="${u}" style="max-width:320px;min-width:280px"><section></section></blockquote></div>
+`).join('');
+
+(async () => {
+  const mcs = await window.FUCHSIA.cargarMasterclasses();
+  const proximas = mcs.filter(m => m.estado === 'proxima');
+  const pasadas = mcs.filter(m => m.estado !== 'proxima');
+  document.getElementById('proximas-grid').innerHTML = proximas.length
+    ? proximas.map(window.FUCHSIA.cardMasterclass).join('')
+    : '<p>La próxima masterclass se anuncia cada semana. ¡Escríbenos por WhatsApp!</p>';
+  document.getElementById('pasadas-grid').innerHTML = pasadas.map(window.FUCHSIA.cardMasterclass).join('');
+  window.FUCHSIA.initTilt(); window.FUCHSIA.initReveal();
+})();
+</script>
+<script src="/assets/js/main.js"></script>
+</body>
+</html>

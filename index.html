@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fuchsia — Talleres de crecimiento personal y profesional para mujeres</title>
+<meta name="description" content="Fuchsia: talleres virtuales y presenciales en finanzas, crecimiento personal, desarrollo profesional e imagen y liderazgo. Incluye Empowerd Mujer, masterclasses gratuitas cada martes.">
+<link rel="icon" href="/assets/img/fuchsia-fuchsia-logo.jpeg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;900&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/css/styles.css">
+</head>
+<body>
+<script src="/assets/partials.js"></script>
+
+<section class="hero reveal in">
+  <div class="container">
+    <img src="/assets/img/fuchsia-fuchsia-logo.jpeg" alt="Fuchsia" class="logo-hero">
+    <h1>Activa tu nueva versión</h1>
+    <p class="lead">Talleres virtuales y presenciales para mujeres que quieren crecer en finanzas, vida personal, carrera e imagen — con un espacio gratuito siempre abierto: <strong>Empowerd Mujer</strong>.</p>
+    <div class="cta-row">
+      <a href="/servicios/" class="btn">Ver talleres</a>
+      <a href="/empowerd/" class="btn ghost">Conocer Empowerd <span class="gratis">Gratis</span></a>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <div class="section-title reveal">
+      <h2>Lanzamiento Fuchsia</h2>
+      <p>El comienzo de este espacio para acompañar a mujeres en su crecimiento integral.</p>
+    </div>
+    <div class="video-embed reveal">
+      <blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/reel/DVEQi9kkddh/" data-instgrm-version="14" style="width:100%"></blockquote>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <div class="section-title reveal">
+      <h2>Nuestros 4 focos</h2>
+      <p>Cada taller de Fuchsia nace de uno de estos cuatro pilares.</p>
+    </div>
+    <div class="grid cols-4" id="focos-grid"></div>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <div class="tilt-card reveal" style="padding:50px;text-align:center">
+      <div class="glow"></div>
+      <span class="badge-foco">Producto gratuito</span>
+      <h2>Empowerd Mujer</h2>
+      <p class="lead" style="margin:0 auto 1.5em">Masterclasses 100% gratis todos los martes a las 7:30 p.m. Belleza, finanzas, autoestima, IA y más — sin costo, siempre.</p>
+      <a href="/empowerd/" class="btn">Entrar a Empowerd Mujer</a>
+    </div>
+  </div>
+</section>
+
+<script src="https://www.instagram.com/embed.js" async></script>
+<script>
+window.FOCOS = [
+  {nombre:"Finanzas y Negocios", conceptos:["Finanzas Inteligentes","Emprendimiento Estratégico"]},
+  {nombre:"Crecimiento Personal", conceptos:["Autoestima Plena","Bienestar Espiritual","Empoderamiento Femenino"]},
+  {nombre:"Desarrollo Profesional", conceptos:["Proyección Profesional","Comunicación y Oratoria","Gestión del Tiempo"]},
+  {nombre:"Imagen y Liderazgo", conceptos:["Etiqueta y Presencia","Liderazgo Impactante"]},
+];
+const grid = document.getElementById('focos-grid');
+grid.innerHTML = window.FOCOS.map(f => `
+  <div class="tilt-card reveal foco-card">
+    <div class="glow"></div>
+    <h3>${f.nombre}</h3>
+    <ul>${f.conceptos.map(c=>`<li>${c}</li>`).join('')}</ul>
+  </div>`).join('');
+</script>
+<script src="/assets/js/main.js"></script>
+</body>
+</html>

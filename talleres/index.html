@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Taller — Fuchsia</title>
+<link rel="icon" href="/assets/img/fuchsia-fuchsia-logo.jpeg">
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;900&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/css/styles.css">
+</head>
+<body>
+<script src="/assets/partials.js"></script>
+
+<section class="hero" style="padding-top:120px" id="taller-hero">
+  <div class="container"><p>Cargando taller...</p></div>
+</section>
+
+<section style="padding-top:0">
+  <div class="container" style="max-width:600px">
+    <div id="taller-form-zona"></div>
+  </div>
+</section>
+
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script src="/assets/js/config.js"></script>
+<script src="/assets/js/supabase-init.js"></script>
+<script>
+(async () => {
+  const slug = new URLSearchParams(location.search).get('slug');
+  const hero = document.getElementById('taller-hero');
+  const zona = document.getElementById('taller-form-zona');
+  if (!slug) { hero.innerHTML = '<div class="container"><p>Taller no encontrado.</p></div>'; return; }
+
+  const { data: t, error } = await window.FUCHSIA_SB.from('talleres').select('*').eq('slug', slug).single();
+  if (error || !t) { hero.innerHTML = '<div class="container"><p>Taller no encontrado.</p></div>'; return; }
+
+  hero.querySelector('.container').innerHTML = `
+    ${t.imagen_url ? `<img src="${t.imagen_url}" style="max-width:280px;border-radius:18px;margin:0 auto 24px;display:block" alt="${t.titulo}">` : ''}
+    <span class="badge-foco">${t.foco || 'Taller Fuchsia'}</span>
+    <h1>${t.titulo}</h1>
+    <p class="lead">${t.descripcion || ''}</p>`;
+
+  if (t.estado !== 'proximo') {
+    zona.innerHTML = `<p style="text-align:center;color:var(--gris)">Este taller ya finalizó. Síguenos para no perderte el próximo.</p>
+      <p style="text-align:center"><a href="/servicios/" class="btn ghost">Ver talleres próximos</a></p>`;
+    return;
+  }
+
+  const campos = t.campos_inscripcion || [{name:'nombre',label:'Nombre completo',type:'text',required:true},{name:'celular',label:'Celular',type:'tel',required:true}];
+  zona.innerHTML = `
+    <h2 style="text-align:center">Inscríbete aquí</h2>
+    <form class="elegant" id="form-inscripcion" style="margin:0 auto">
+      ${campos.map(c => `
+        <div>
+          <label>${c.label}${c.required ? ' *' : ''}</label>
+          <input name="${c.name}" type="${c.type||'text'}" ${c.required ? 'required' : ''}>
+        </div>`).join('')}
+      <button type="submit" class="btn">Continuar al pago</button>
+      <p id="form-msg" style="color:var(--gris);font-size:.85rem"></p>
+    </form>`;
+
+  document.getElementById('form-inscripcion').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const fd = new FormData(e.target);
+    const datos = {}; fd.forEach((v,k) => datos[k] = v);
+    const { error: insErr } = await window.FUCHSIA_SB.from('registros_talleres').insert({ taller_id: t.id, datos });
+    if (insErr) { document.getElementById('form-msg').textContent = 'Hubo un error, intenta de nuevo.'; return; }
+
+    const hoy = new Date().toISOString().slice(0,10);
+    const enPreventa = t.fecha_limite_preventa && hoy <= t.fecha_limite_preventa;
+    const link = enPreventa ? t.link_pago_preventa : t.link_pago_regular;
+    if (link) { window.location.href = link; }
+    else { document.getElementById('form-msg').textContent = '¡Registrado! Pronto te contactaremos con el link de pago.'; }
+  });
+})();
+</script>
+<script src="/assets/js/main.js"></script>
+</body>
+</html>

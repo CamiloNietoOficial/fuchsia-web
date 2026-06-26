@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Talleres — Fuchsia</title>
+<link rel="icon" href="/assets/img/fuchsia-fuchsia-logo.jpeg">
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;900&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/css/styles.css">
+</head>
+<body>
+<script src="/assets/partials.js"></script>
+
+<section class="hero" style="padding-top:120px">
+  <div class="container">
+    <h1>Talleres Fuchsia</h1>
+    <p class="lead">Virtuales o presenciales, organizados en 4 focos. Inscríbete y participa en el próximo.</p>
+  </div>
+</section>
+
+<section style="padding-top:0">
+  <div class="container">
+    <div class="grid cols-4" id="focos-grid"></div>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <div class="section-title left reveal"><h2>Próximos talleres</h2></div>
+    <div class="grid cols-3" id="proximos-grid"><p>Cargando...</p></div>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <div class="section-title left reveal"><h2>Talleres realizados</h2></div>
+    <div class="grid cols-3" id="pasados-grid"><p>Cargando...</p></div>
+  </div>
+</section>
+
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script src="/assets/js/config.js"></script>
+<script src="/assets/js/supabase-init.js"></script>
+<script src="/assets/js/talleres.js"></script>
+<script>
+window.FOCOS = [
+  {nombre:"Finanzas y Negocios", conceptos:["Finanzas Inteligentes","Emprendimiento Estratégico"]},
+  {nombre:"Crecimiento Personal", conceptos:["Autoestima Plena","Bienestar Espiritual","Empoderamiento Femenino"]},
+  {nombre:"Desarrollo Profesional", conceptos:["Proyección Profesional","Comunicación y Oratoria","Gestión del Tiempo"]},
+  {nombre:"Imagen y Liderazgo", conceptos:["Etiqueta y Presencia","Liderazgo Impactante"]},
+];
+document.getElementById('focos-grid').innerHTML = window.FOCOS.map(f => `
+  <div class="tilt-card reveal foco-card">
+    <div class="glow"></div>
+    <h3>${f.nombre}</h3>
+    <ul>${f.conceptos.map(c=>`<li>${c}</li>`).join('')}</ul>
+  </div>`).join('');
+
+(async () => {
+  const talleres = await window.FUCHSIA.cargarTalleres();
+  const proximos = talleres.filter(t => t.estado === 'proximo');
+  const pasados = talleres.filter(t => t.estado !== 'proximo');
+  document.getElementById('proximos-grid').innerHTML = proximos.length
+    ? proximos.map(window.FUCHSIA.cardTaller).join('')
+    : '<p>Por ahora no hay talleres próximos. ¡Vuelve pronto!</p>';
+  document.getElementById('pasados-grid').innerHTML = pasados.map(window.FUCHSIA.cardTaller).join('');
+  window.FUCHSIA.initTilt(); window.FUCHSIA.initReveal();
+})();
+</script>
+<script src="/assets/js/main.js"></script>
+</body>
+</html>

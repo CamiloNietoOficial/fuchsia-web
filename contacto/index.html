@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contáctenos — Fuchsia</title>
+<link rel="icon" href="/assets/img/fuchsia-fuchsia-logo.jpeg">
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;900&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/css/styles.css">
+</head>
+<body>
+<script src="/assets/partials.js"></script>
+
+<section class="hero" style="padding-top:120px">
+  <div class="container">
+    <h1>Contáctenos</h1>
+    <p class="lead">Cuéntanos qué necesitas y te respondemos pronto.</p>
+  </div>
+</section>
+
+<section style="padding-top:0">
+  <div class="container" style="max-width:520px">
+    <form class="elegant" id="form-contacto" style="margin:0 auto">
+      <div><label>Nombre *</label><input name="nombre" required></div>
+      <div><label>Correo *</label><input name="correo" type="email" required></div>
+      <div><label>Celular</label><input name="celular" type="tel"></div>
+      <div><label>Mensaje</label><textarea name="mensaje" rows="4"></textarea></div>
+      <button type="submit" class="btn">Enviar</button>
+      <p id="contacto-msg" style="color:var(--gris);font-size:.85rem"></p>
+    </form>
+  </div>
+</section>
+
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script src="/assets/js/config.js"></script>
+<script src="/assets/js/supabase-init.js"></script>
+<script>
+document.getElementById('form-contacto').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const fd = new FormData(e.target);
+  const payload = Object.fromEntries(fd.entries());
+  const { error } = await window.FUCHSIA_SB.from('contactos_fuchsia').insert(payload);
+  document.getElementById('contacto-msg').textContent = error ? 'Hubo un error, intenta de nuevo.' : '¡Gracias! Te contactaremos pronto.';
+  if (!error) e.target.reset();
+});
+</script>
+<script src="/assets/js/main.js"></script>
+</body>
+</html>
