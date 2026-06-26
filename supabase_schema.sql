@@ -14,8 +14,9 @@ create table public.profiles (
   created_at timestamptz not null default now()
 );
 alter table public.profiles enable row level security;
-create policy "select propio perfil" on public.profiles for select using (auth.uid() = id);
-create policy "update propio perfil" on public.profiles for update using (auth.uid() = id);
+-- (select auth.uid()) en vez de auth.uid() evita reevaluar la funcion por cada fila (advisor de performance)
+create policy "select propio perfil" on public.profiles for select using ((select auth.uid()) = id);
+create policy "update propio perfil" on public.profiles for update using ((select auth.uid()) = id);
 
 create or replace function public.handle_new_user()
 returns trigger as $$
@@ -25,6 +26,9 @@ begin
   return new;
 end;
 $$ language plpgsql security definer set search_path = public;
+
+-- Esta funcion solo debe ejecutarse via el trigger de auth.users, nunca via RPC publico
+revoke execute on function public.handle_new_user() from public, anon, authenticated;
 
 create trigger on_auth_user_created
   after insert on auth.users
@@ -52,8 +56,16 @@ create table public.talleres (
 );
 alter table public.talleres enable row level security;
 create policy "select publico talleres" on public.talleres for select using (true);
-create policy "admin escribe talleres" on public.talleres for all using (
-  exists (select 1 from public.profiles p where p.id = auth.uid() and p.is_admin)
+-- Policies de admin separadas por comando (en vez de "for all") para que no se
+-- evaluen junto con "select publico talleres" en cada SELECT (advisor de performance)
+create policy "admin inserta talleres" on public.talleres for insert with check (
+  exists (select 1 from public.profiles p where p.id = (select auth.uid()) and p.is_admin)
+);
+create policy "admin actualiza talleres" on public.talleres for update using (
+  exists (select 1 from public.profiles p where p.id = (select auth.uid()) and p.is_admin)
+);
+create policy "admin borra talleres" on public.talleres for delete using (
+  exists (select 1 from public.profiles p where p.id = (select auth.uid()) and p.is_admin)
 );
 
 create table public.registros_talleres (
@@ -66,8 +78,9 @@ create table public.registros_talleres (
 alter table public.registros_talleres enable row level security;
 create policy "insert publico registros" on public.registros_talleres for insert with check (true);
 create policy "admin lee registros" on public.registros_talleres for select using (
-  exists (select 1 from public.profiles p where p.id = auth.uid() and p.is_admin)
+  exists (select 1 from public.profiles p where p.id = (select auth.uid()) and p.is_admin)
 );
+create index if not exists idx_registros_talleres_taller_id on public.registros_talleres(taller_id);
 
 -- Masterclasses (Empowerd Mujer, siempre gratis)
 create type masterclass_estado as enum ('proxima','pasada');
@@ -83,8 +96,14 @@ create table public.masterclasses (
 );
 alter table public.masterclasses enable row level security;
 create policy "select publico masterclasses" on public.masterclasses for select using (true);
-create policy "admin escribe masterclasses" on public.masterclasses for all using (
-  exists (select 1 from public.profiles p where p.id = auth.uid() and p.is_admin)
+create policy "admin inserta masterclasses" on public.masterclasses for insert with check (
+  exists (select 1 from public.profiles p where p.id = (select auth.uid()) and p.is_admin)
+);
+create policy "admin actualiza masterclasses" on public.masterclasses for update using (
+  exists (select 1 from public.profiles p where p.id = (select auth.uid()) and p.is_admin)
+);
+create policy "admin borra masterclasses" on public.masterclasses for delete using (
+  exists (select 1 from public.profiles p where p.id = (select auth.uid()) and p.is_admin)
 );
 
 -- Contacto
@@ -100,7 +119,7 @@ create table public.contactos_fuchsia (
 alter table public.contactos_fuchsia enable row level security;
 create policy "insert publico contacto" on public.contactos_fuchsia for insert with check (true);
 create policy "admin lee contactos" on public.contactos_fuchsia for select using (
-  exists (select 1 from public.profiles p where p.id = auth.uid() and p.is_admin)
+  exists (select 1 from public.profiles p where p.id = (select auth.uid()) and p.is_admin)
 );
 
 -- Storage bucket publico para imagenes subidas desde el admin
