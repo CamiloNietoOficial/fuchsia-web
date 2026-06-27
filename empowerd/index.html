@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Empowerd Mujer — Gratis | Fuchsia</title>
-<meta name="description" content="Empowerd Mujer: masterclasses 100% gratuitas todos los martes a las 7:30 p.m. Belleza, finanzas, autoestima y más.">
+<title>E-Mujer (Empowerd) — Gratis | Fuchsia</title>
+<meta name="description" content="E-Mujer (Empowerd): red de apoyo gratuita para el crecimiento integral de las mujeres. Masterclasses gratuitas todos los martes a las 7:30 p.m.">
 <link rel="icon" href="/assets/img/empowerd-logo-empowerd.jpeg">
-<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;900&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;900&family=Jost:wght@300;400;500&family=Allerta+Stencil&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/css/styles.css">
 </head>
 <body>
@@ -14,28 +14,39 @@
 
 <section class="hero" style="padding-top:120px">
   <div class="container">
-    <img src="/assets/img/empowerd-logo-empowerd.jpeg" alt="Empowerd Mujer" class="logo-hero" style="border-radius:20px">
+    <img src="/assets/img/empowerd-logo-empowerd.jpeg" alt="E-Mujer (Empowerd)" class="logo-hero" style="border-radius:20px">
     <span class="gratis" style="margin-bottom:1em">100% Gratis</span>
-    <h1>Empowerd Mujer</h1>
-    <p class="lead">Masterclasses gratuitas todos los <strong>martes a las 7:30 p.m.</strong> Un espacio para crecer sin costo, siempre.</p>
+    <h1>E-Mujer</h1>
+    <p class="lead">Una red de apoyo creada para impulsar el crecimiento integral de las mujeres, fortaleciendo su desarrollo personal, profesional y emocional a través del aprendizaje, la acción y la comunidad. Creemos que cuando una mujer crece, también tiene el poder de transformar la vida de otras.</p>
     <div class="cta-row">
-      <a id="btn-wa-link" class="btn whatsapp" target="_blank" rel="noopener">Pedir el link por WhatsApp</a>
+      <a id="btn-wa-grupo" class="btn whatsapp" target="_blank" rel="noopener">Quiero unirme al grupo</a>
+      <a id="btn-wa-link" class="btn ghost" target="_blank" rel="noopener">Pedir el link de la masterclass</a>
     </div>
+    <p style="color:var(--gris);margin-top:1.2em">Masterclasses <strong>gratuitas</strong> todos los martes a las 7:30 p.m.</p>
   </div>
 </section>
 
-<section>
+<section class="crema">
   <div class="container">
     <div class="section-title reveal">
-      <h2>Qué es Empowerd</h2>
+      <h2>Nuestro camino, en 4 pilares</h2>
     </div>
-    <div class="video-embed reveal">
-      <blockquote class="tiktok-embed" cite="https://vt.tiktok.com/ZSCj9H5CY/" data-video-id="" style="max-width:320px;min-width:280px"><section></section></blockquote>
-    </div>
+    <div class="grid cols-4" id="pilares-grid"></div>
   </div>
 </section>
 
 <section>
+  <div class="container split">
+    <div class="reveal" id="que-es-video"></div>
+    <div class="reveal">
+      <h2>Crecimiento integral y apoyo mutuo</h2>
+      <p>Estos pilares se fortalecen mediante experiencias reales: actividades individuales, encuentros grupales, talleres, capacitaciones, espacios de networking y experiencias diseñadas para aprender, conectar, crear vínculos y crecer juntas.</p>
+      <p><strong>E-Mujer es un espacio donde ninguna mujer camina sola</strong>, porque cada logro individual fortalece a toda la comunidad.</p>
+    </div>
+  </div>
+</section>
+
+<section class="crema">
   <div class="container">
     <div class="section-title left reveal"><h2>Próximas masterclass <span class="gratis">Gratis</span></h2></div>
     <div class="grid cols-3" id="proximas-grid"><p>Cargando...</p></div>
@@ -49,29 +60,54 @@
   </div>
 </section>
 
-<section>
+<section class="crema">
   <div class="container">
     <div class="section-title reveal"><h2>Encuentros, actividades y testimonios</h2></div>
     <div class="grid cols-3" id="tiktoks-grid"></div>
   </div>
 </section>
 
-<script src="https://www.tiktok.com/embed.js" async></script>
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <script src="/assets/js/config.js"></script>
 <script src="/assets/js/supabase-init.js"></script>
 <script src="/assets/js/masterclasses.js"></script>
+<script src="/assets/js/main.js"></script>
 <script>
-document.getElementById('btn-wa-link').href = `https://wa.me/${window.FUCHSIA_WHATSAPP_EMPOWERD}?text=${encodeURIComponent('Hola, quiero el link de la próxima masterclass gratuita de Empowerd Mujer')}`;
+const waBase = `https://wa.me/${window.FUCHSIA_WHATSAPP_EMPOWERD}`;
+document.getElementById('btn-wa-link').href = `${waBase}?text=${encodeURIComponent('Hola, quiero el link de la próxima masterclass gratuita de E-Mujer')}`;
+document.getElementById('btn-wa-grupo').href = `${waBase}?text=${encodeURIComponent('Hola, quiero unirme al grupo de E-Mujer')}`;
+
+document.getElementById('que-es-video').innerHTML = window.FUCHSIA.videoCard({
+  poster: '/assets/img/empowerd-logo-empowerd.jpeg',
+  link: 'https://vt.tiktok.com/ZSCj9H5CY/',
+  alt: 'Qué es E-Mujer'
+});
+
+const PILARES = [
+  {n:'01', t:'Rompe el Silencio', d:'Para sanar y alzar la voz.'},
+  {n:'02', t:'Renace y Brilla', d:'Para fortalecer la autoestima y el liderazgo.'},
+  {n:'03', t:'Emprendedoras en Potencia', d:'Para desarrollar habilidades, proyectos y oportunidades.'},
+  {n:'04', t:'Comparte tu Luz', d:'Porque el crecimiento cobra aún más sentido cuando se comparte, y se convierte en una red de apoyo que inspira y transforma.'},
+];
+document.getElementById('pilares-grid').innerHTML = PILARES.map(p => `
+  <div class="tilt-card reveal glow-spot pilar-card"><div class="glow"></div>
+    <div class="num">${p.n}</div><h3>${p.t}</h3><p style="color:var(--gris);font-size:.9rem">${p.d}</p>
+  </div>`).join('');
 
 const tiktoks = [
-  "https://vt.tiktok.com/ZSCj9pnKD/","https://vt.tiktok.com/ZSCj9WT8F/","https://vt.tiktok.com/ZSCjxmTj3/",
-  "https://vt.tiktok.com/ZSCj9nq9g/",
-  "https://vt.tiktok.com/ZSCj93gjc/","https://vt.tiktok.com/ZSCjx4vhS/","https://vt.tiktok.com/ZSCjxn6A6/","https://vt.tiktok.com/ZSCjxnXrU/","https://vt.tiktok.com/ZSCjQdvV8/"
+  {u:"https://vt.tiktok.com/ZSCj9pnKD/", t:"Encuentro E-Mujer"},
+  {u:"https://vt.tiktok.com/ZSCj9WT8F/", t:"Encuentro E-Mujer"},
+  {u:"https://vt.tiktok.com/ZSCjxmTj3/", t:"Encuentro E-Mujer"},
+  {u:"https://vt.tiktok.com/ZSCj9nq9g/", t:"Actividad E-Mujer"},
+  {u:"https://vt.tiktok.com/ZSCj93gjc/", t:"Testimonio"},
+  {u:"https://vt.tiktok.com/ZSCjx4vhS/", t:"Testimonio"},
+  {u:"https://vt.tiktok.com/ZSCjxn6A6/", t:"Testimonio"},
+  {u:"https://vt.tiktok.com/ZSCjxnXrU/", t:"Testimonio"},
+  {u:"https://vt.tiktok.com/ZSCjQdvV8/", t:"Testimonio"},
 ];
-document.getElementById('tiktoks-grid').innerHTML = tiktoks.map(u => `
-  <div class="video-embed reveal"><blockquote class="tiktok-embed" cite="${u}" style="max-width:320px;min-width:280px"><section></section></blockquote></div>
-`).join('');
+document.getElementById('tiktoks-grid').innerHTML = tiktoks.map(v => window.FUCHSIA.videoCard({
+  poster: '/assets/img/empowerd-logo-empowerd.jpeg', link: v.u, alt: v.t
+})).join('');
 
 (async () => {
   const mcs = await window.FUCHSIA.cargarMasterclasses();
@@ -81,9 +117,8 @@ document.getElementById('tiktoks-grid').innerHTML = tiktoks.map(u => `
     ? proximas.map(window.FUCHSIA.cardMasterclass).join('')
     : '<p>La próxima masterclass se anuncia cada semana. ¡Escríbenos por WhatsApp!</p>';
   document.getElementById('pasadas-grid').innerHTML = pasadas.map(window.FUCHSIA.cardMasterclass).join('');
-  window.FUCHSIA.initTilt(); window.FUCHSIA.initReveal();
+  window.FUCHSIA.initTilt(); window.FUCHSIA.initReveal(); window.FUCHSIA.initGlowSpots();
 })();
 </script>
-<script src="/assets/js/main.js"></script>
 </body>
 </html>

@@ -4,30 +4,70 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Contáctenos — Fuchsia</title>
-<link rel="icon" href="/assets/img/fuchsia-fuchsia-logo.jpeg">
-<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;900&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="icon" href="/assets/img/fuchsia-icono.png">
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;900&family=Jost:wght@300;400;500&family=Allerta+Stencil&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/css/styles.css">
 </head>
 <body>
 <script src="/assets/partials.js"></script>
 
-<section class="hero" style="padding-top:120px">
+<section class="hero" style="padding-top:120px;padding-bottom:0">
   <div class="container">
-    <h1>Contáctenos</h1>
-    <p class="lead">Cuéntanos qué necesitas y te respondemos pronto.</p>
+    <span class="badge-foco">Contáctenos</span>
+    <h1>Hablemos de tu próximo paso</h1>
+    <p class="lead">Cuéntanos qué buscas — un taller, una masterclass de E-Mujer, o simplemente quieres saber más — y te respondemos pronto.</p>
   </div>
 </section>
 
-<section style="padding-top:0">
-  <div class="container" style="max-width:520px">
-    <form class="elegant" id="form-contacto" style="margin:0 auto">
-      <div><label>Nombre *</label><input name="nombre" required></div>
-      <div><label>Correo *</label><input name="correo" type="email" required></div>
-      <div><label>Celular</label><input name="celular" type="tel"></div>
-      <div><label>Mensaje</label><textarea name="mensaje" rows="4"></textarea></div>
-      <button type="submit" class="btn">Enviar</button>
-      <p id="contacto-msg" style="color:var(--gris);font-size:.85rem"></p>
-    </form>
+<section>
+  <div class="container split">
+    <img src="/assets/img/fuchsia-portada-diversidad.jpg" alt="Mujeres de Fuchsia" style="border-radius:var(--radio);box-shadow:var(--sombra)">
+
+    <div class="tilt-card glow-spot reveal" style="padding:36px">
+      <div class="glow"></div>
+      <h2 style="margin-bottom:.2em">Escríbenos</h2>
+      <p style="color:var(--gris);margin-top:0;margin-bottom:1.4em">Respondemos en 1-2 días hábiles.</p>
+      <form class="elegant" id="form-contacto">
+        <div><label>Nombre *</label><input name="nombre" required></div>
+        <div><label>Correo *</label><input name="correo" type="email" required></div>
+        <div><label>Celular</label><input name="celular" type="tel"></div>
+        <div><label>¿En qué te podemos ayudar?</label>
+          <select name="servicio">
+            <option value="">Selecciona una opción</option>
+            <option>Quiero inscribirme a un taller</option>
+            <option>Quiero información de E-Mujer (gratis)</option>
+            <option>Quiero ser mentora/experta en Fuchsia</option>
+            <option>Otra consulta</option>
+          </select>
+        </div>
+        <div><label>Mensaje</label><textarea name="mensaje" rows="4"></textarea></div>
+        <button type="submit" class="btn">Enviar mensaje</button>
+        <p id="contacto-msg" style="color:var(--gris);font-size:.85rem"></p>
+      </form>
+    </div>
+  </div>
+</section>
+
+<section class="crema">
+  <div class="container grid cols-3">
+    <div class="tilt-card reveal glow-spot" style="padding:30px;text-align:center">
+      <div class="glow"></div>
+      <h3>WhatsApp</h3>
+      <p style="color:var(--gris)">Respuesta más rápida, ideal para E-Mujer.</p>
+      <a href="https://wa.me/573118458121" target="_blank" rel="noopener" class="btn whatsapp" style="margin-top:10px">Escribir por WhatsApp</a>
+    </div>
+    <div class="tilt-card reveal glow-spot" style="padding:30px;text-align:center">
+      <div class="glow"></div>
+      <h3>Correo</h3>
+      <p style="color:var(--gris)">admin@fuchsia.com.co</p>
+      <a href="mailto:admin@fuchsia.com.co" class="btn ghost" style="margin-top:10px">Enviar correo</a>
+    </div>
+    <div class="tilt-card reveal glow-spot" style="padding:30px;text-align:center">
+      <div class="glow"></div>
+      <h3>Talleres y E-Mujer</h3>
+      <p style="color:var(--gris)">Mira la agenda completa antes de escribirnos.</p>
+      <a href="/servicios/" class="btn ghost" style="margin-top:10px">Ver talleres</a>
+    </div>
   </div>
 </section>
 

@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Fuchsia — Talleres de crecimiento personal y profesional para mujeres</title>
 <meta name="description" content="Fuchsia: talleres virtuales y presenciales en finanzas, crecimiento personal, desarrollo profesional e imagen y liderazgo. Incluye Empowerd Mujer, masterclasses gratuitas cada martes.">
-<link rel="icon" href="/assets/img/fuchsia-fuchsia-logo.jpeg">
+<link rel="icon" href="/assets/img/fuchsia-icono.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;900&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;900&family=Jost:wght@300;400;500&family=Allerta+Stencil&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/css/styles.css">
 </head>
 <body>
@@ -15,25 +15,24 @@
 
 <section class="hero reveal in">
   <div class="container">
-    <img src="/assets/img/fuchsia-fuchsia-logo.jpeg" alt="Fuchsia" class="logo-hero">
+    <img src="/assets/img/fuchsia-logo-eslogan.png" alt="Fuchsia — Despierta tu talento, expande tu poder" class="logo-hero">
     <h1>Activa tu nueva versión</h1>
-    <p class="lead">Talleres virtuales y presenciales para mujeres que quieren crecer en finanzas, vida personal, carrera e imagen — con un espacio gratuito siempre abierto: <strong>Empowerd Mujer</strong>.</p>
+    <p class="lead">Talleres virtuales y presenciales para mujeres que quieren crecer en finanzas, vida personal, carrera e imagen.</p>
     <div class="cta-row">
       <a href="/servicios/" class="btn">Ver talleres</a>
-      <a href="/empowerd/" class="btn ghost">Conocer Empowerd <span class="gratis">Gratis</span></a>
+      <a href="/empowerd/" class="btn ghost">Conocer E-Mujer</a>
     </div>
   </div>
 </section>
 
-<section>
-  <div class="container">
-    <div class="section-title reveal">
-      <h2>Lanzamiento Fuchsia</h2>
-      <p>El comienzo de este espacio para acompañar a mujeres en su crecimiento integral.</p>
+<section class="crema">
+  <div class="container split">
+    <div class="reveal">
+      <span class="badge-foco">Qué es Fuchsia</span>
+      <h2>Un espacio que conecta con quienes ya recorrieron el camino</h2>
+      <p class="lead" style="margin:0">Fuchsia es un espacio que conecta con mentores y expertos que despiertan tu potencial y lo transforman en oportunidades de crecimiento personal y profesional.</p>
     </div>
-    <div class="video-embed reveal">
-      <blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/reel/DVEQi9kkddh/" data-instgrm-version="14" style="width:100%"></blockquote>
-    </div>
+    <div class="reveal" id="lanzamiento-video"></div>
   </div>
 </section>
 
@@ -47,20 +46,26 @@
   </div>
 </section>
 
-<section>
+<section class="dark">
   <div class="container">
-    <div class="tilt-card reveal" style="padding:50px;text-align:center">
+    <div class="tilt-card dark glow-spot reveal" style="padding:50px;text-align:center;border:1px solid #2a2530">
       <div class="glow"></div>
-      <span class="badge-foco">Producto gratuito</span>
-      <h2>Empowerd Mujer</h2>
-      <p class="lead" style="margin:0 auto 1.5em">Masterclasses 100% gratis todos los martes a las 7:30 p.m. Belleza, finanzas, autoestima, IA y más — sin costo, siempre.</p>
-      <a href="/empowerd/" class="btn">Entrar a Empowerd Mujer</a>
+      <span class="gratis" style="margin-bottom:1em">Producto 100% gratuito</span>
+      <h2>E-Mujer</h2>
+      <p class="lead" style="margin:0 auto 1.5em">Masterclasses gratuitas todos los martes a las 7:30 p.m. Belleza, finanzas, autoestima, IA y más.</p>
+      <a href="/empowerd/" class="btn">Entrar a E-Mujer</a>
     </div>
   </div>
 </section>
 
-<script src="https://www.instagram.com/embed.js" async></script>
+<script src="/assets/js/main.js"></script>
 <script>
+document.getElementById('lanzamiento-video').innerHTML = window.FUCHSIA.videoCard({
+  poster: '/assets/img/fuchsia-lanzamiento-fuchsia.jpeg',
+  link: 'https://www.instagram.com/reel/DVEQi9kkddh/',
+  alt: 'Lanzamiento Fuchsia'
+});
+
 window.FOCOS = [
   {nombre:"Finanzas y Negocios", conceptos:["Finanzas Inteligentes","Emprendimiento Estratégico"]},
   {nombre:"Crecimiento Personal", conceptos:["Autoestima Plena","Bienestar Espiritual","Empoderamiento Femenino"]},
@@ -69,12 +74,13 @@ window.FOCOS = [
 ];
 const grid = document.getElementById('focos-grid');
 grid.innerHTML = window.FOCOS.map(f => `
-  <div class="tilt-card reveal foco-card">
+  <div class="tilt-card reveal foco-card glow-spot">
     <div class="glow"></div>
     <h3>${f.nombre}</h3>
     <ul>${f.conceptos.map(c=>`<li>${c}</li>`).join('')}</ul>
   </div>`).join('');
+
+window.FUCHSIA.initTilt(); window.FUCHSIA.initReveal(); window.FUCHSIA.initGlowSpots();
 </script>
-<script src="/assets/js/main.js"></script>
 </body>
 </html>
