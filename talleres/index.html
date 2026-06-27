@@ -15,6 +15,10 @@
   <div class="container"><p>Cargando taller...</p></div>
 </section>
 
+<section class="crema" style="padding-top:0" id="taller-video-section" hidden>
+  <div class="container" style="max-width:420px" id="taller-video"></div>
+</section>
+
 <section style="padding-top:0">
   <div class="container" style="max-width:600px">
     <div id="taller-form-zona"></div>
@@ -24,6 +28,7 @@
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <script src="/assets/js/config.js"></script>
 <script src="/assets/js/supabase-init.js"></script>
+<script src="/assets/js/main.js"></script>
 <script>
 (async () => {
   const slug = new URLSearchParams(location.search).get('slug');
@@ -39,6 +44,14 @@
     <span class="badge-foco">${t.foco || 'Taller Fuchsia'}</span>
     <h1>${t.titulo}</h1>
     <p class="lead">${t.descripcion || ''}</p>`;
+
+  if (t.video_url) {
+    const esMp4 = t.video_url.endsWith('.mp4');
+    document.getElementById('taller-video').innerHTML = window.FUCHSIA.videoCard(
+      esMp4 ? { poster: t.imagen_url, mp4: t.video_url, alt: t.titulo } : { poster: t.imagen_url, link: t.video_url, alt: t.titulo }
+    );
+    document.getElementById('taller-video-section').hidden = false;
+  }
 
   if (t.estado !== 'proximo') {
     zona.innerHTML = `<p style="text-align:center;color:var(--gris)">Este taller ya finalizó. Síguenos para no perderte el próximo.</p>
@@ -74,6 +87,5 @@
   });
 })();
 </script>
-<script src="/assets/js/main.js"></script>
 </body>
 </html>

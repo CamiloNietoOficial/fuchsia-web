@@ -176,8 +176,10 @@ footer .container{display:flex;justify-content:space-between;flex-wrap:wrap;gap:
 .reveal{opacity:0;transform:translateY(24px);transition:opacity .7s,transform .7s}
 .reveal.in{opacity:1;transform:none}
 
-form.elegant{display:grid;gap:16px;max-width:480px}
+form.elegant{display:grid;gap:16px;max-width:480px;width:100%}
+form.elegant > div{width:100%}
 form.elegant input,form.elegant select,form.elegant textarea{
+  box-sizing:border-box;width:100%;display:block;
   background:var(--blanco);border:1.5px solid var(--linea);
   color:var(--negro);padding:.9em 1em;border-radius:10px;font-family:var(--font-text);font-size:1rem;
 }

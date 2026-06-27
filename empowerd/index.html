@@ -79,7 +79,7 @@ document.getElementById('btn-wa-grupo').href = `${waBase}?text=${encodeURICompon
 
 document.getElementById('que-es-video').innerHTML = window.FUCHSIA.videoCard({
   poster: '/assets/img/empowerd-logo-empowerd.jpeg',
-  link: 'https://vt.tiktok.com/ZSCj9H5CY/',
+  mp4: 'encuentros-1.mp4',
   alt: 'Qué es E-Mujer'
 });
 
@@ -94,19 +94,21 @@ document.getElementById('pilares-grid').innerHTML = PILARES.map(p => `
     <div class="num">${p.n}</div><h3>${p.t}</h3><p style="color:var(--gris);font-size:.9rem">${p.d}</p>
   </div>`).join('');
 
-const tiktoks = [
-  {u:"https://vt.tiktok.com/ZSCj9pnKD/", t:"Encuentro E-Mujer"},
-  {u:"https://vt.tiktok.com/ZSCj9WT8F/", t:"Encuentro E-Mujer"},
-  {u:"https://vt.tiktok.com/ZSCjxmTj3/", t:"Encuentro E-Mujer"},
-  {u:"https://vt.tiktok.com/ZSCj9nq9g/", t:"Actividad E-Mujer"},
-  {u:"https://vt.tiktok.com/ZSCj93gjc/", t:"Testimonio"},
-  {u:"https://vt.tiktok.com/ZSCjx4vhS/", t:"Testimonio"},
-  {u:"https://vt.tiktok.com/ZSCjxn6A6/", t:"Testimonio"},
-  {u:"https://vt.tiktok.com/ZSCjxnXrU/", t:"Testimonio"},
-  {u:"https://vt.tiktok.com/ZSCjQdvV8/", t:"Testimonio"},
+const videosEmpowerd = [
+  {mp4:"encuentros-1.mp4", t:"Encuentro E-Mujer"},
+  {mp4:"encuentros-2.mp4", t:"Encuentro E-Mujer"},
+  {mp4:"encuentros-3.mp4", t:"Encuentro E-Mujer"},
+  {mp4:"actividades-1.mp4", t:"Actividad E-Mujer"},
+  {mp4:"actividades-2.mp4", t:"Actividad E-Mujer"},
+  {mp4:"testimonio-1.mp4", t:"Testimonio"},
+  {mp4:"testimonio-2.mp4", t:"Testimonio"},
+  {mp4:"testimonio-3.mp4", t:"Testimonio"},
+  {mp4:"testimonio-4.mp4", t:"Testimonio"},
+  {mp4:"testimonio-5.mp4", t:"Testimonio"},
+  {mp4:"testimonio-6.mp4", t:"Testimonio"},
 ];
-document.getElementById('tiktoks-grid').innerHTML = tiktoks.map(v => window.FUCHSIA.videoCard({
-  poster: '/assets/img/empowerd-logo-empowerd.jpeg', link: v.u, alt: v.t
+document.getElementById('tiktoks-grid').innerHTML = videosEmpowerd.map(v => window.FUCHSIA.videoCard({
+  poster: '/assets/img/empowerd-logo-empowerd.jpeg', mp4: v.mp4, alt: v.t
 })).join('');
 
 (async () => {
