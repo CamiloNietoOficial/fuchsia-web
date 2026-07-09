@@ -106,11 +106,17 @@ function renderCampos(){
         <option value="tel" ${c.type==='tel'?'selected':''}>Teléfono</option>
         <option value="email" ${c.type==='email'?'selected':''}>Correo</option>
         <option value="number" ${c.type==='number'?'selected':''}>Número</option>
+        <option value="select" ${c.type==='select'?'selected':''}>Opción fija (select)</option>
       </select>
+      ${c.type==='select' ? `<input data-i="${i}" data-k="options" value="${(c.options||[]).join(', ')}" placeholder="Opción 1, Opción 2, Opción 3" style="flex:1.4">` : ''}
       <button type="button" data-del="${i}" class="btn ghost" style="padding:.5em 1em">x</button>
     </div>`).join('');
   document.querySelectorAll('#campos-lista input,#campos-lista select').forEach(el => {
-    el.addEventListener('input', () => { campos[el.dataset.i][el.dataset.k] = el.value; });
+    el.addEventListener('input', () => {
+      if (el.dataset.k === 'options') { campos[el.dataset.i].options = el.value.split(',').map(s => s.trim()).filter(Boolean); return; }
+      campos[el.dataset.i][el.dataset.k] = el.value;
+      if (el.dataset.k === 'type') renderCampos();
+    });
   });
   document.querySelectorAll('[data-del]').forEach(b => b.addEventListener('click', () => { campos.splice(b.dataset.del,1); renderCampos(); }));
 }

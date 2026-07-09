@@ -66,7 +66,11 @@
       ${campos.map(c => `
         <div>
           <label>${c.label}${c.required ? ' *' : ''}</label>
-          <input name="${c.name}" type="${c.type||'text'}" ${c.required ? 'required' : ''}>
+          ${c.type === 'select' && c.options ? `
+          <select name="${c.name}" ${c.required ? 'required' : ''}>
+            <option value="" disabled selected>Selecciona una opción</option>
+            ${c.options.map(o => `<option value="${o}">${o}</option>`).join('')}
+          </select>` : `<input name="${c.name}" type="${c.type||'text'}" ${c.required ? 'required' : ''}>`}
         </div>`).join('')}
       <button type="submit" class="btn">Continuar al pago</button>
       <p id="form-msg" style="color:var(--gris);font-size:.85rem"></p>
