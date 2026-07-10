@@ -77,7 +77,7 @@
           </div>` : '';
         return `<div><label>${c.label}${c.required ? ' *' : ''}</label>${campoHtml}</div>${condicionalHtml}`;
       }).join('')}
-      <button type="submit" class="btn">Continuar al pago</button>
+      <button type="submit" class="btn">${(t.link_pago_preventa || t.link_pago_regular) ? 'Continuar al pago' : 'Registrarme'}</button>
       <p id="form-msg" style="color:var(--gris);font-size:.85rem"></p>
     </form>`;
 
@@ -111,7 +111,7 @@
     const enPreventa = t.fecha_limite_preventa && hoy <= t.fecha_limite_preventa;
     const link = enPreventa ? t.link_pago_preventa : t.link_pago_regular;
     if (link) { window.location.href = link; }
-    else { document.getElementById('form-msg').textContent = '¡Registrado! Pronto te contactaremos con el link de pago.'; }
+    else { document.getElementById('form-msg').textContent = '¡Listo, quedaste registrado/a! Nos vemos en el taller.'; }
   });
 })();
 </script>
