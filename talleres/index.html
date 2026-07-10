@@ -102,16 +102,30 @@
 
   document.getElementById('form-inscripcion').addEventListener('submit', async (e) => {
     e.preventDefault();
-    const fd = new FormData(e.target);
-    const datos = {}; fd.forEach((v,k) => datos[k] = v);
-    const { error: insErr } = await window.FUCHSIA_SB.from('registros_talleres').insert({ taller_id: t.id, datos });
-    if (insErr) { document.getElementById('form-msg').textContent = 'Hubo un error, intenta de nuevo.'; return; }
+    const btn = document.querySelector('#form-inscripcion button[type=submit]');
+    const msg = document.getElementById('form-msg');
+    const textoOriginal = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = 'Enviando...';
+    msg.textContent = '';
+    try {
+      const fd = new FormData(e.target);
+      const datos = {}; fd.forEach((v,k) => datos[k] = v);
+      const { error: insErr } = await window.FUCHSIA_SB.from('registros_talleres').insert({ taller_id: t.id, datos });
+      if (insErr) throw insErr;
 
-    const hoy = new Date().toISOString().slice(0,10);
-    const enPreventa = t.fecha_limite_preventa && hoy <= t.fecha_limite_preventa;
-    const link = enPreventa ? t.link_pago_preventa : t.link_pago_regular;
-    if (link) { window.location.href = link; }
-    else { document.getElementById('form-msg').textContent = '¡Listo, quedaste registrado/a! Nos vemos en el taller.'; }
+      const hoy = new Date().toISOString().slice(0,10);
+      const enPreventa = t.fecha_limite_preventa && hoy <= t.fecha_limite_preventa;
+      const link = enPreventa ? t.link_pago_preventa : t.link_pago_regular;
+      if (link) { window.location.href = link; return; }
+      msg.textContent = '¡Listo, quedaste registrado/a! Nos vemos en el taller.';
+      btn.textContent = 'Registrado';
+    } catch (err) {
+      console.error(err);
+      msg.textContent = 'Hubo un error al registrar, intenta de nuevo o escríbenos por WhatsApp.';
+      btn.disabled = false;
+      btn.textContent = textoOriginal;
+    }
   });
 })();
 </script>
