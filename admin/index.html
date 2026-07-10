@@ -111,7 +111,14 @@ let editingTallerId = null;
 let editingMcId = null;
 
 function renderCampos(){
-  document.getElementById('campos-lista').innerHTML = campos.map((c,i) => `
+  document.getElementById('campos-lista').innerHTML = campos.map((c,i) => {
+    const isSelect = c.type === 'select';
+    const condRows = (isSelect && c.condicional) ? (c.options||[]).map(o => `
+      <div class="campo-row" style="margin-left:20px">
+        <span style="flex:.6;font-size:.82rem;color:var(--gris)">Si elige "${o}":</span>
+        <input data-i="${i}" data-cond-opt="${o}" value="${c.condicional[o]||''}" placeholder="Pregunta a mostrar" style="flex:2">
+      </div>`).join('') : '';
+    return `
     <div class="campo-row">
       <input data-i="${i}" data-k="label" value="${c.label}" placeholder="Etiqueta" style="flex:1">
       <input data-i="${i}" data-k="name" value="${c.name}" placeholder="nombre_campo" style="flex:1">
@@ -122,13 +129,34 @@ function renderCampos(){
         <option value="number" ${c.type==='number'?'selected':''}>Número</option>
         <option value="select" ${c.type==='select'?'selected':''}>Opción fija (select)</option>
       </select>
-      ${c.type==='select' ? `<input data-i="${i}" data-k="options" value="${(c.options||[]).join(', ')}" placeholder="Opción 1, Opción 2, Opción 3" style="flex:1.4">` : ''}
+      ${isSelect ? `<input data-i="${i}" data-k="options" value="${(c.options||[]).join(', ')}" placeholder="Opción 1, Opción 2, Opción 3" style="flex:1.4">` : ''}
       <button type="button" data-del="${i}" class="btn ghost" style="padding:.5em 1em">x</button>
-    </div>`).join('');
+    </div>
+    ${isSelect ? `
+    <div class="campo-row" style="margin-left:20px">
+      <label style="display:flex;gap:6px;align-items:center;font-size:.82rem;color:var(--gris)">
+        <input type="checkbox" data-i="${i}" data-k="tiene_condicional" ${c.condicional ? 'checked' : ''} style="width:auto">
+        Cada opción despliega una pregunta adicional
+      </label>
+    </div>${condRows}` : ''}`;
+  }).join('');
   document.querySelectorAll('#campos-lista input,#campos-lista select').forEach(el => {
     el.addEventListener('input', () => {
-      if (el.dataset.k === 'options') { campos[el.dataset.i].options = el.value.split(',').map(s => s.trim()).filter(Boolean); return; }
-      campos[el.dataset.i][el.dataset.k] = el.value;
+      const i = el.dataset.i;
+      if (el.dataset.condOpt !== undefined) {
+        campos[i].condicional = campos[i].condicional || {};
+        campos[i].condicional[el.dataset.condOpt] = el.value;
+        campos[i].condicional_name = campos[i].condicional_name || (campos[i].name + '_detalle');
+        return;
+      }
+      if (el.dataset.k === 'tiene_condicional') {
+        if (el.checked) { campos[i].condicional = {}; campos[i].condicional_name = campos[i].name + '_detalle'; }
+        else { delete campos[i].condicional; delete campos[i].condicional_name; }
+        renderCampos();
+        return;
+      }
+      if (el.dataset.k === 'options') { campos[i].options = el.value.split(',').map(s => s.trim()).filter(Boolean); if (campos[i].condicional) renderCampos(); return; }
+      campos[i][el.dataset.k] = el.value;
       if (el.dataset.k === 'type') renderCampos();
     });
   });

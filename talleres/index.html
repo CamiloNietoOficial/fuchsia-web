@@ -63,18 +63,42 @@
   zona.innerHTML = `
     <h2 style="text-align:center">Inscríbete aquí</h2>
     <form class="elegant" id="form-inscripcion" style="margin:0 auto">
-      ${campos.map(c => `
-        <div>
-          <label>${c.label}${c.required ? ' *' : ''}</label>
-          ${c.type === 'select' && c.options ? `
+      ${campos.map(c => {
+        const condName = c.condicional_name || (c.name + '_detalle');
+        const campoHtml = c.type === 'select' && c.options ? `
           <select name="${c.name}" ${c.required ? 'required' : ''}>
             <option value="" disabled selected>Selecciona una opción</option>
             ${c.options.map(o => `<option value="${o}">${o}</option>`).join('')}
-          </select>` : `<input name="${c.name}" type="${c.type||'text'}" ${c.required ? 'required' : ''}>`}
-        </div>`).join('')}
+          </select>` : `<input name="${c.name}" type="${c.type||'text'}" ${c.required ? 'required' : ''}>`;
+        const condicionalHtml = c.condicional ? `
+          <div class="campo-condicional" data-for="${c.name}" hidden>
+            <label class="campo-condicional-label"></label>
+            <input name="${condName}" type="text">
+          </div>` : '';
+        return `<div><label>${c.label}${c.required ? ' *' : ''}</label>${campoHtml}</div>${condicionalHtml}`;
+      }).join('')}
       <button type="submit" class="btn">Continuar al pago</button>
       <p id="form-msg" style="color:var(--gris);font-size:.85rem"></p>
     </form>`;
+
+  campos.filter(c => c.condicional).forEach(c => {
+    const select = document.querySelector(`select[name="${c.name}"]`);
+    const wrap = document.querySelector(`.campo-condicional[data-for="${c.name}"]`);
+    const label = wrap.querySelector('.campo-condicional-label');
+    const input = wrap.querySelector('input');
+    select.addEventListener('change', () => {
+      const texto = c.condicional[select.value];
+      if (texto) {
+        label.textContent = texto + ' *';
+        input.required = true;
+        wrap.hidden = false;
+      } else {
+        wrap.hidden = true;
+        input.required = false;
+        input.value = '';
+      }
+    });
+  });
 
   document.getElementById('form-inscripcion').addEventListener('submit', async (e) => {
     e.preventDefault();
