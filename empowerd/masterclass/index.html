@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Masterclass — E-Mujer | Fuchsia</title>
+<link rel="icon" href="/assets/img/empowerd-logo-empowerd.jpeg">
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;900&family=Jost:wght@300;400;500&family=Allerta+Stencil&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/css/styles.css?v=2">
+</head>
+<body>
+<script src="/assets/partials.js?v=2"></script>
+
+<section class="hero" style="padding-top:120px" id="mc-hero">
+  <div class="container"><p>Cargando...</p></div>
+</section>
+
+<section class="crema" style="padding-top:0" id="mc-video-section" hidden>
+  <div class="container" style="max-width:420px" id="mc-video"></div>
+</section>
+
+<section style="padding-top:0">
+  <div class="container" style="max-width:600px">
+    <div id="mc-form-zona"></div>
+  </div>
+</section>
+
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script src="/assets/js/config.js"></script>
+<script src="/assets/js/supabase-init.js"></script>
+<script src="/assets/js/main.js?v=2"></script>
+<script>
+(async () => {
+  const slug = new URLSearchParams(location.search).get('slug');
+  const hero = document.getElementById('mc-hero');
+  const zona = document.getElementById('mc-form-zona');
+  if (!slug) { hero.innerHTML = '<div class="container"><p>Masterclass no encontrada.</p></div>'; return; }
+
+  const { data: m, error } = await window.FUCHSIA_SB.from('masterclasses').select('*').eq('slug', slug).single();
+  if (error || !m) { hero.innerHTML = '<div class="container"><p>Masterclass no encontrada.</p></div>'; return; }
+
+  hero.querySelector('.container').innerHTML = `
+    ${m.imagen_url ? `<img src="${m.imagen_url}" style="max-width:280px;border-radius:18px;margin:0 auto 24px;display:block" alt="${m.titulo}">` : ''}
+    <span class="gratis">100% Gratis</span>
+    <h1>${m.titulo}</h1>
+    ${m.fecha ? `<p class="lead">${new Date(m.fecha + 'T00:00:00').toLocaleDateString('es-CO', {weekday:'long', day:'numeric', month:'long'})} · 7:30 p.m.</p>` : ''}`;
+
+  if (m.video_url) {
+    const esMp4 = m.video_url.endsWith('.mp4');
+    document.getElementById('mc-video').innerHTML = window.FUCHSIA.videoCard(
+      esMp4 ? { poster: m.imagen_url, mp4: m.video_url, alt: m.titulo } : { poster: m.imagen_url, link: m.video_url, alt: m.titulo }
+    );
+    document.getElementById('mc-video-section').hidden = false;
+  }
+
+  if (m.estado === 'pasada') {
+    zona.innerHTML = `<p style="text-align:center;color:var(--gris)">Esta masterclass ya se realizó. Síguenos para no perderte la próxima.</p>
+      <p style="text-align:center"><a href="/empowerd/" class="btn ghost">Ver próximas masterclass</a></p>`;
+    return;
+  }
+  if (m.estado === 'pospuesta') {
+    zona.innerHTML = `<p style="text-align:center;color:var(--gris)">Esta masterclass fue pospuesta. Muy pronto anunciamos la nueva fecha.</p>
+      <p style="text-align:center"><a href="/empowerd/" class="btn ghost">Volver a E-Mujer</a></p>`;
+    return;
+  }
+
+  zona.innerHTML = `
+    <h2 style="text-align:center">Regístrate gratis aquí</h2>
+    <form class="elegant" id="form-inscripcion-mc" style="margin:0 auto">
+      <div><label>Nombre completo *</label><input name="nombre" type="text" required></div>
+      <div><label>WhatsApp *</label><input name="whatsapp" type="tel" required></div>
+      <button type="submit" class="btn">Separar mi cupo</button>
+      <p id="mc-form-msg" style="color:var(--gris);font-size:.85rem"></p>
+    </form>`;
+
+  document.getElementById('form-inscripcion-mc').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const fd = new FormData(e.target);
+    const datos = { nombre: fd.get('nombre'), whatsapp: fd.get('whatsapp') };
+    const { error: insErr } = await window.FUCHSIA_SB.from('registros_masterclasses').insert({ masterclass_id: m.id, datos });
+    const msg = document.getElementById('mc-form-msg');
+    if (insErr) { msg.textContent = 'Hubo un error, intenta de nuevo.'; return; }
+    document.getElementById('form-inscripcion-mc').innerHTML = `<p style="text-align:center">¡Listo! Te escribiremos por WhatsApp con el link de acceso antes del evento.</p>
+      <p style="text-align:center"><a href="https://wa.me/${window.FUCHSIA_WHATSAPP_EMPOWERD}?text=${encodeURIComponent('Hola, ya me registré a la masterclass ' + m.titulo)}" class="btn whatsapp" target="_blank" rel="noopener">Escribir por WhatsApp</a></p>`;
+  });
+})();
+</script>
+</body>
+</html>

@@ -36,7 +36,7 @@
     </div>
 
     <div class="panel active" id="panel-talleres">
-      <h2>Nuevo taller</h2>
+      <h2 id="form-taller-titulo">Nuevo taller</h2>
       <form class="elegant" id="form-taller">
         <div><label>Título *</label><input name="titulo" required></div>
         <div><label>Slug (URL) *</label><input name="slug" required placeholder="ej: taller-de-finanzas"></div>
@@ -50,7 +50,7 @@
           <select name="modalidad"><option value="virtual">Virtual</option><option value="presencial">Presencial</option></select>
         </div>
         <div><label>Descripción</label><textarea name="descripcion" rows="3"></textarea></div>
-        <div><label>Imagen</label><input type="file" name="imagen" accept="image/*"></div>
+        <div><label>Imagen</label><div id="taller-imagen-actual" style="margin-bottom:6px"></div><input type="file" name="imagen" accept="image/*"></div>
         <div><label>Fecha del taller</label><input type="date" name="fecha_taller"></div>
         <div><label>Fecha límite de preventa</label><input type="date" name="fecha_limite_preventa"></div>
         <div><label>Link de pago preventa (Wompi/Nequi)</label><input name="link_pago_preventa"></div>
@@ -63,7 +63,10 @@
         <div><label>Estado</label>
           <select name="estado"><option value="proximo">Próximo</option><option value="pasado">Pasado</option><option value="desactivado">Desactivado</option></select>
         </div>
-        <button type="submit" class="btn">Crear taller</button>
+        <div style="display:flex;gap:10px">
+          <button type="submit" class="btn" id="btn-guardar-taller">Crear taller</button>
+          <button type="button" class="btn ghost" id="btn-cancelar-taller" hidden>Cancelar edición</button>
+        </div>
         <p id="taller-msg" style="color:var(--gris)"></p>
       </form>
 
@@ -72,18 +75,22 @@
     </div>
 
     <div class="panel" id="panel-masterclasses">
-      <h2>Nueva masterclass</h2>
+      <h2 id="form-mc-titulo">Nueva masterclass</h2>
       <form class="elegant" id="form-mc">
         <div><label>Título *</label><input name="titulo" required></div>
-        <div><label>Imagen</label><input type="file" name="imagen" accept="image/*"></div>
+        <div><label>Imagen</label><div id="mc-imagen-actual" style="margin-bottom:6px"></div><input type="file" name="imagen" accept="image/*"></div>
         <div><label>Fecha (martes)</label><input type="date" name="fecha"></div>
-        <div><label>Estado</label><select name="estado"><option value="proxima">Próxima</option><option value="pasada">Pasada</option></select></div>
-        <button type="submit" class="btn">Crear masterclass</button>
+        <div><label>Estado</label><select name="estado"><option value="proxima">Próxima</option><option value="pospuesta">Pospuesta</option><option value="pasada">Pasada</option></select></div>
+        <div style="display:flex;gap:10px">
+          <button type="submit" class="btn" id="btn-guardar-mc">Crear masterclass</button>
+          <button type="button" class="btn ghost" id="btn-cancelar-mc" hidden>Cancelar edición</button>
+        </div>
         <p id="mc-msg" style="color:var(--gris)"></p>
+        <p style="font-size:.82rem;color:var(--gris)">El link de registro (nombre + WhatsApp) se genera solo al crear la masterclass.</p>
       </form>
 
       <h2 style="margin-top:50px">Masterclasses existentes</h2>
-      <table><thead><tr><th>Título</th><th>Estado</th><th>Acción</th></tr></thead><tbody id="tabla-mc"></tbody></table>
+      <table><thead><tr><th>Título</th><th>Estado</th><th>Link de registro</th><th>Acción</th></tr></thead><tbody id="tabla-mc"></tbody></table>
     </div>
   </div>
 </section>
@@ -94,7 +101,14 @@
 <script src="/assets/js/auth.js"></script>
 <script src="/assets/js/admin.js"></script>
 <script>
+function slugify(s){
+  var combining = new RegExp('[' + String.fromCharCode(0x0300) + '-' + String.fromCharCode(0x036f) + ']', 'g');
+  return (s||'').normalize('NFD').replace(combining, '').replace(/[^a-zA-Z0-9]+/g,'-').replace(/^-+|-+$/g,'').toLowerCase();
+}
+
 let campos = [{name:'nombre',label:'Nombre completo',type:'text',required:true},{name:'celular',label:'Celular',type:'tel',required:true}];
+let editingTallerId = null;
+let editingMcId = null;
 
 function renderCampos(){
   document.getElementById('campos-lista').innerHTML = campos.map((c,i) => `
@@ -130,25 +144,104 @@ document.querySelectorAll('.tabs button').forEach(b => b.addEventListener('click
   document.getElementById('panel-'+b.dataset.tab).classList.add('active');
 }));
 
+let talleresCache = [];
+let mcCache = [];
+
 async function listarTalleres(){
   const { data } = await window.FUCHSIA_SB.from('talleres').select('*').order('id', {ascending:false});
-  document.getElementById('tabla-talleres').innerHTML = (data||[]).map(t => `
+  talleresCache = data || [];
+  document.getElementById('tabla-talleres').innerHTML = talleresCache.map(t => `
     <tr><td>${t.titulo}</td><td>${t.foco||''}</td><td>${t.estado}</td>
-    <td><button data-id="${t.id}" class="btn-del-taller btn ghost" style="padding:.4em 1em">Borrar</button></td></tr>`).join('');
+    <td>
+      <button data-id="${t.id}" class="btn-edit-taller btn ghost" style="padding:.4em 1em">Editar</button>
+      <button data-id="${t.id}" class="btn-del-taller btn ghost" style="padding:.4em 1em">Borrar</button>
+    </td></tr>`).join('');
   document.querySelectorAll('.btn-del-taller').forEach(b => b.addEventListener('click', async () => {
+    if (!confirm('¿Borrar este taller?')) return;
     await window.FUCHSIA_SB.from('talleres').delete().eq('id', b.dataset.id); listarTalleres();
   }));
+  document.querySelectorAll('.btn-edit-taller').forEach(b => b.addEventListener('click', () => cargarTallerParaEditar(b.dataset.id)));
 }
 
 async function listarMc(){
   const { data } = await window.FUCHSIA_SB.from('masterclasses').select('*').order('id', {ascending:false});
-  document.getElementById('tabla-mc').innerHTML = (data||[]).map(m => `
+  mcCache = data || [];
+  document.getElementById('tabla-mc').innerHTML = mcCache.map(m => `
     <tr><td>${m.titulo}</td><td>${m.estado}</td>
-    <td><button data-id="${m.id}" class="btn-del-mc btn ghost" style="padding:.4em 1em">Borrar</button></td></tr>`).join('');
+    <td>${m.link_registro ? `<a href="${m.link_registro}" target="_blank" style="font-size:.8rem">${m.link_registro.replace('https://','')}</a>` : '—'}</td>
+    <td>
+      <button data-id="${m.id}" class="btn-edit-mc btn ghost" style="padding:.4em 1em">Editar</button>
+      <button data-id="${m.id}" class="btn-del-mc btn ghost" style="padding:.4em 1em">Borrar</button>
+    </td></tr>`).join('');
   document.querySelectorAll('.btn-del-mc').forEach(b => b.addEventListener('click', async () => {
+    if (!confirm('¿Borrar esta masterclass?')) return;
     await window.FUCHSIA_SB.from('masterclasses').delete().eq('id', b.dataset.id); listarMc();
   }));
+  document.querySelectorAll('.btn-edit-mc').forEach(b => b.addEventListener('click', () => cargarMcParaEditar(b.dataset.id)));
 }
+
+function cargarTallerParaEditar(id){
+  const t = talleresCache.find(x => String(x.id) === String(id));
+  if (!t) return;
+  editingTallerId = t.id;
+  const form = document.getElementById('form-taller');
+  form.titulo.value = t.titulo || '';
+  form.slug.value = t.slug || '';
+  form.foco.value = t.foco || '';
+  form.modalidad.value = t.modalidad || 'virtual';
+  form.descripcion.value = t.descripcion || '';
+  form.fecha_taller.value = t.fecha_taller || '';
+  form.fecha_limite_preventa.value = t.fecha_limite_preventa || '';
+  form.link_pago_preventa.value = t.link_pago_preventa || '';
+  form.link_pago_regular.value = t.link_pago_regular || '';
+  form.estado.value = t.estado || 'proximo';
+  campos = JSON.parse(JSON.stringify(t.campos_inscripcion || campos));
+  renderCampos();
+  document.getElementById('taller-imagen-actual').innerHTML = t.imagen_url ? `<img src="${t.imagen_url}" style="max-width:120px;border-radius:8px;display:block">` : '';
+  document.getElementById('form-taller-titulo').textContent = 'Editar taller: ' + t.titulo;
+  document.getElementById('btn-guardar-taller').textContent = 'Guardar cambios';
+  document.getElementById('btn-cancelar-taller').hidden = false;
+  document.getElementById('taller-msg').textContent = '';
+  form.scrollIntoView({behavior:'smooth'});
+}
+
+function cancelarEdicionTaller(){
+  editingTallerId = null;
+  document.getElementById('form-taller').reset();
+  campos = [{name:'nombre',label:'Nombre completo',type:'text',required:true},{name:'celular',label:'Celular',type:'tel',required:true}];
+  renderCampos();
+  document.getElementById('taller-imagen-actual').innerHTML = '';
+  document.getElementById('form-taller-titulo').textContent = 'Nuevo taller';
+  document.getElementById('btn-guardar-taller').textContent = 'Crear taller';
+  document.getElementById('btn-cancelar-taller').hidden = true;
+}
+document.getElementById('btn-cancelar-taller').addEventListener('click', cancelarEdicionTaller);
+
+function cargarMcParaEditar(id){
+  const m = mcCache.find(x => String(x.id) === String(id));
+  if (!m) return;
+  editingMcId = m.id;
+  const form = document.getElementById('form-mc');
+  form.titulo.value = m.titulo || '';
+  form.fecha.value = m.fecha || '';
+  form.estado.value = m.estado || 'proxima';
+  document.getElementById('mc-imagen-actual').innerHTML = m.imagen_url ? `<img src="${m.imagen_url}" style="max-width:120px;border-radius:8px;display:block">` : '';
+  document.getElementById('form-mc-titulo').textContent = 'Editar masterclass: ' + m.titulo;
+  document.getElementById('btn-guardar-mc').textContent = 'Guardar cambios';
+  document.getElementById('btn-cancelar-mc').hidden = false;
+  document.getElementById('mc-msg').textContent = '';
+  form.scrollIntoView({behavior:'smooth'});
+}
+
+function cancelarEdicionMc(){
+  editingMcId = null;
+  document.getElementById('form-mc').reset();
+  document.getElementById('mc-imagen-actual').innerHTML = '';
+  document.getElementById('form-mc-titulo').textContent = 'Nueva masterclass';
+  document.getElementById('btn-guardar-mc').textContent = 'Crear masterclass';
+  document.getElementById('btn-cancelar-mc').hidden = true;
+}
+document.getElementById('btn-cancelar-mc').addEventListener('click', cancelarEdicionMc);
 
 document.getElementById('form-taller').addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -164,9 +257,13 @@ document.getElementById('form-taller').addEventListener('submit', async (e) => {
     estado: fd.get('estado'), campos_inscripcion: campos,
   };
   if (imagen_url) payload.imagen_url = imagen_url;
-  const { error } = await window.FUCHSIA_SB.from('talleres').insert(payload);
-  document.getElementById('taller-msg').textContent = error ? error.message : 'Taller creado.';
-  if (!error) { e.target.reset(); listarTalleres(); }
+
+  const { error } = editingTallerId
+    ? await window.FUCHSIA_SB.from('talleres').update(payload).eq('id', editingTallerId)
+    : await window.FUCHSIA_SB.from('talleres').insert(payload);
+
+  document.getElementById('taller-msg').textContent = error ? error.message : (editingTallerId ? 'Cambios guardados.' : 'Taller creado.');
+  if (!error) { cancelarEdicionTaller(); listarTalleres(); }
 });
 
 document.getElementById('form-mc').addEventListener('submit', async (e) => {
@@ -175,11 +272,28 @@ document.getElementById('form-mc').addEventListener('submit', async (e) => {
   let imagen_url = null;
   const file = fd.get('imagen');
   if (file && file.size) imagen_url = await window.FUCHSIA.subirImagen(file);
-  const payload = { titulo: fd.get('titulo'), fecha: fd.get('fecha') || null, estado: fd.get('estado') };
+  const msg = document.getElementById('mc-msg');
+
+  if (editingMcId) {
+    const payload = { titulo: fd.get('titulo'), fecha: fd.get('fecha') || null, estado: fd.get('estado') };
+    if (imagen_url) payload.imagen_url = imagen_url;
+    const { error } = await window.FUCHSIA_SB.from('masterclasses').update(payload).eq('id', editingMcId);
+    msg.textContent = error ? error.message : 'Cambios guardados.';
+    if (!error) { cancelarEdicionMc(); listarMc(); }
+    return;
+  }
+
+  let slug = slugify(fd.get('titulo'));
+  if (mcCache.some(m => m.slug === slug)) slug += '-' + Date.now().toString(36).slice(-4);
+  const link_registro = location.origin + '/empowerd/masterclass/?slug=' + slug;
+  const payload = {
+    titulo: fd.get('titulo'), fecha: fd.get('fecha') || null, estado: fd.get('estado'),
+    slug, link_registro,
+  };
   if (imagen_url) payload.imagen_url = imagen_url;
   const { error } = await window.FUCHSIA_SB.from('masterclasses').insert(payload);
-  document.getElementById('mc-msg').textContent = error ? error.message : 'Masterclass creada.';
-  if (!error) { e.target.reset(); listarMc(); }
+  msg.innerHTML = error ? error.message : `Masterclass creada. Link de registro: <a href="${link_registro}" target="_blank">${link_registro}</a>`;
+  if (!error) { cancelarEdicionMc(); listarMc(); }
 });
 
 (async () => {

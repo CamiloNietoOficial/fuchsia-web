@@ -59,9 +59,14 @@ document.getElementById('link-registro').addEventListener('click', (e) => {
 document.getElementById('form-login').addEventListener('submit', async (e) => {
   e.preventDefault();
   const fd = new FormData(e.target);
-  const { error } = await window.FUCHSIA.iniciarSesion(fd.get('email'), fd.get('password'));
+  const { data, error } = await window.FUCHSIA.iniciarSesion(fd.get('email'), fd.get('password'));
   document.getElementById('login-msg').textContent = error ? window.FUCHSIA.traducirError(error.message) : '';
-  if (!error) location.href = next;
+  if (error) return;
+  if (!params.get('next')) {
+    const { data: perfil } = await window.FUCHSIA_SB.from('profiles').select('is_admin').eq('id', data.user.id).single();
+    if (perfil && perfil.is_admin) { location.href = '/admin/'; return; }
+  }
+  location.href = next;
 });
 
 document.getElementById('link-recuperar').addEventListener('click', async (e) => {
