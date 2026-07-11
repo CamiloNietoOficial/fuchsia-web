@@ -107,7 +107,11 @@
       <div style="overflow-x:auto">
         <table id="modal-registros-tabla"><thead></thead><tbody></tbody></table>
       </div>
-      <button type="button" class="btn" id="btn-descargar-csv" style="margin-top:16px">Descargar Excel (CSV)</button>
+      <div style="display:flex;gap:10px;align-items:center;margin-top:16px;flex-wrap:wrap">
+        <button type="button" class="btn" id="btn-guardar-asistencia">Guardar asistencia</button>
+        <button type="button" class="btn ghost" id="btn-descargar-csv">Descargar Excel (CSV)</button>
+        <span id="modal-registros-guardado-msg" style="color:var(--gris);font-size:.85rem"></span>
+      </div>
     </div>
   </div>
 </section>
@@ -278,17 +282,37 @@ async function verRegistros(tipo, id, titulo){
     filas.length === 1 ? '1 persona inscrita' : filas.length + ' personas inscritas';
 
   document.querySelector('#modal-registros-tabla thead').innerHTML =
-    '<tr>' + cols.map(c => `<th>${etiquetas[c] || c}</th>`).join('') + '</tr>';
+    '<tr>' + cols.map(c => `<th>${etiquetas[c] || c}</th>`).join('') + '<th>Asistió</th></tr>';
   document.querySelector('#modal-registros-tabla tbody').innerHTML = filas.length
     ? filas.map(f => '<tr>' + cols.map(c => {
         if (c === 'created_at') return `<td>${new Date(f.created_at).toLocaleString('es-CO')}</td>`;
         return `<td>${(f.datos && f.datos[c]) || ''}</td>`;
-      }).join('') + '</tr>').join('')
+      }).join('') + `<td style="text-align:center"><input type="checkbox" class="chk-asistio" data-row-id="${f.id}" ${f.asistio ? 'checked' : ''} style="width:18px;height:18px;cursor:pointer"></td></tr>`).join('')
     : '';
 
-  registrosActuales = { filas, cols, etiquetas, titulo };
+  registrosActuales = { tipo, filas, cols, etiquetas, titulo };
+  document.getElementById('modal-registros-guardado-msg').textContent = '';
   document.getElementById('modal-registros').hidden = false;
 }
+
+document.getElementById('btn-guardar-asistencia').addEventListener('click', async () => {
+  if (!registrosActuales) return;
+  const tabla = registrosActuales.tipo === 'taller' ? 'registros_talleres' : 'registros_masterclasses';
+  const msg = document.getElementById('modal-registros-guardado-msg');
+  const checks = Array.from(document.querySelectorAll('.chk-asistio'));
+  msg.textContent = 'Guardando...';
+  const resultados = await Promise.all(checks.map(chk =>
+    window.FUCHSIA_SB.from(tabla).update({ asistio: chk.checked }).eq('id', chk.dataset.rowId)
+  ));
+  const conError = resultados.find(r => r.error);
+  msg.textContent = conError ? conError.error.message : 'Asistencia guardada.';
+  if (!conError) {
+    registrosActuales.filas.forEach(f => {
+      const chk = checks.find(c => String(c.dataset.rowId) === String(f.id));
+      if (chk) f.asistio = chk.checked;
+    });
+  }
+});
 
 document.getElementById('btn-cerrar-modal').addEventListener('click', () => {
   document.getElementById('modal-registros').hidden = true;
@@ -297,8 +321,8 @@ document.getElementById('btn-cerrar-modal').addEventListener('click', () => {
 document.getElementById('btn-descargar-csv').addEventListener('click', () => {
   if (!registrosActuales) return;
   const { filas, cols, etiquetas, titulo } = registrosActuales;
-  const filasCsv = [cols.map(c => etiquetas[c] || c)].concat(
-    filas.map(f => cols.map(c => c === 'created_at' ? new Date(f.created_at).toLocaleString('es-CO') : ((f.datos && f.datos[c]) || '')))
+  const filasCsv = [cols.map(c => etiquetas[c] || c).concat('Asistió')].concat(
+    filas.map(f => cols.map(c => c === 'created_at' ? new Date(f.created_at).toLocaleString('es-CO') : ((f.datos && f.datos[c]) || '')).concat(f.asistio ? 'Sí' : 'No'))
   );
   const csv = filasCsv.map(fila => fila.map(v => '"' + String(v).replace(/"/g, '""') + '"').join(',')).join('\r\n');
   const blob = new Blob([String.fromCharCode(0xFEFF) + csv], { type: 'text/csv;charset=utf-8;' });
