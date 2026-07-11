@@ -16,6 +16,8 @@
   .panel{display:none}
   .panel.active{display:block}
   .campo-row{display:flex;gap:8px;align-items:flex-end}
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:100;padding:20px}
+  .modal-box{background:#fff;border-radius:14px;padding:24px;max-width:900px;width:100%;max-height:85vh;overflow-y:auto}
 </style>
 </head>
 <body>
@@ -71,7 +73,7 @@
       </form>
 
       <h2 style="margin-top:50px">Talleres existentes</h2>
-      <table><thead><tr><th>Título</th><th>Foco</th><th>Estado</th><th>Acción</th></tr></thead><tbody id="tabla-talleres"></tbody></table>
+      <table><thead><tr><th>Título</th><th>Foco</th><th>Estado</th><th>Inscritos</th><th>Acción</th></tr></thead><tbody id="tabla-talleres"></tbody></table>
     </div>
 
     <div class="panel" id="panel-masterclasses">
@@ -90,7 +92,21 @@
       </form>
 
       <h2 style="margin-top:50px">Masterclasses existentes</h2>
-      <table><thead><tr><th>Título</th><th>Estado</th><th>Link de registro</th><th>Acción</th></tr></thead><tbody id="tabla-mc"></tbody></table>
+      <table><thead><tr><th>Título</th><th>Estado</th><th>Link de registro</th><th>Inscritos</th><th>Acción</th></tr></thead><tbody id="tabla-mc"></tbody></table>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modal-registros" hidden>
+    <div class="modal-box">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
+        <h3 id="modal-registros-titulo" style="margin:0"></h3>
+        <button type="button" class="btn ghost" id="btn-cerrar-modal" style="padding:.3em .9em">Cerrar</button>
+      </div>
+      <p id="modal-registros-conteo" style="color:var(--gris)"></p>
+      <div style="overflow-x:auto">
+        <table id="modal-registros-tabla"><thead></thead><tbody></tbody></table>
+      </div>
+      <button type="button" class="btn" id="btn-descargar-csv" style="margin-top:16px">Descargar Excel (CSV)</button>
     </div>
   </div>
 </section>
@@ -174,12 +190,27 @@ document.querySelectorAll('.tabs button').forEach(b => b.addEventListener('click
 
 let talleresCache = [];
 let mcCache = [];
+let conteoTalleres = {};
+let conteoMc = {};
+let registrosActuales = null;
+
+async function cargarConteos(){
+  const [{ data: rt }, { data: rm }] = await Promise.all([
+    window.FUCHSIA_SB.from('registros_talleres').select('taller_id'),
+    window.FUCHSIA_SB.from('registros_masterclasses').select('masterclass_id'),
+  ]);
+  conteoTalleres = {};
+  (rt || []).forEach(r => { conteoTalleres[r.taller_id] = (conteoTalleres[r.taller_id] || 0) + 1; });
+  conteoMc = {};
+  (rm || []).forEach(r => { conteoMc[r.masterclass_id] = (conteoMc[r.masterclass_id] || 0) + 1; });
+}
 
 async function listarTalleres(){
   const { data } = await window.FUCHSIA_SB.from('talleres').select('*').order('id', {ascending:false});
   talleresCache = data || [];
   document.getElementById('tabla-talleres').innerHTML = talleresCache.map(t => `
     <tr><td>${t.titulo}</td><td>${t.foco||''}</td><td>${t.estado}</td>
+    <td>${conteoTalleres[t.id] || 0} <button data-id="${t.id}" class="btn-ver-reg-taller btn ghost" style="padding:.3em .8em">Ver</button></td>
     <td>
       <button data-id="${t.id}" class="btn-edit-taller btn ghost" style="padding:.4em 1em">Editar</button>
       <button data-id="${t.id}" class="btn-del-taller btn ghost" style="padding:.4em 1em">Borrar</button>
@@ -189,6 +220,10 @@ async function listarTalleres(){
     await window.FUCHSIA_SB.from('talleres').delete().eq('id', b.dataset.id); listarTalleres();
   }));
   document.querySelectorAll('.btn-edit-taller').forEach(b => b.addEventListener('click', () => cargarTallerParaEditar(b.dataset.id)));
+  document.querySelectorAll('.btn-ver-reg-taller').forEach(b => b.addEventListener('click', () => {
+    const t = talleresCache.find(x => String(x.id) === String(b.dataset.id));
+    verRegistros('taller', t.id, t.titulo);
+  }));
 }
 
 async function listarMc(){
@@ -197,6 +232,7 @@ async function listarMc(){
   document.getElementById('tabla-mc').innerHTML = mcCache.map(m => `
     <tr><td>${m.titulo}</td><td>${m.estado}</td>
     <td>${m.link_registro ? `<a href="${m.link_registro}" target="_blank" style="font-size:.8rem">${m.link_registro.replace('https://','')}</a>` : '—'}</td>
+    <td>${conteoMc[m.id] || 0} <button data-id="${m.id}" class="btn-ver-reg-mc btn ghost" style="padding:.3em .8em">Ver</button></td>
     <td>
       <button data-id="${m.id}" class="btn-edit-mc btn ghost" style="padding:.4em 1em">Editar</button>
       <button data-id="${m.id}" class="btn-del-mc btn ghost" style="padding:.4em 1em">Borrar</button>
@@ -206,7 +242,72 @@ async function listarMc(){
     await window.FUCHSIA_SB.from('masterclasses').delete().eq('id', b.dataset.id); listarMc();
   }));
   document.querySelectorAll('.btn-edit-mc').forEach(b => b.addEventListener('click', () => cargarMcParaEditar(b.dataset.id)));
+  document.querySelectorAll('.btn-ver-reg-mc').forEach(b => b.addEventListener('click', () => {
+    const m = mcCache.find(x => String(x.id) === String(b.dataset.id));
+    verRegistros('masterclass', m.id, m.titulo);
+  }));
 }
+
+async function verRegistros(tipo, id, titulo){
+  const tabla = tipo === 'taller' ? 'registros_talleres' : 'registros_masterclasses';
+  const fk = tipo === 'taller' ? 'taller_id' : 'masterclass_id';
+  const { data } = await window.FUCHSIA_SB.from(tabla).select('*').eq(fk, id).order('created_at', {ascending:true});
+  const filas = data || [];
+
+  const columnas = [];
+  filas.forEach(f => Object.keys(f.datos || {}).forEach(k => { if (!columnas.includes(k)) columnas.push(k); }));
+
+  const etiquetas = {};
+  if (tipo === 'taller') {
+    const t = talleresCache.find(x => x.id === id);
+    (t && t.campos_inscripcion || []).forEach(c => {
+      etiquetas[c.name] = c.label;
+      if (c.condicional_name) etiquetas[c.condicional_name] = 'Detalle';
+    });
+  } else {
+    etiquetas.nombre = 'Nombre';
+    etiquetas.whatsapp = 'WhatsApp';
+  }
+  etiquetas.created_at = 'Fecha de registro';
+  const cols = [...columnas, 'created_at'];
+
+  document.getElementById('modal-registros-titulo').textContent = titulo;
+  document.getElementById('modal-registros-conteo').textContent =
+    filas.length === 0 ? 'Aún no hay inscritos.' :
+    filas.length === 1 ? '1 persona inscrita' : filas.length + ' personas inscritas';
+
+  document.querySelector('#modal-registros-tabla thead').innerHTML =
+    '<tr>' + cols.map(c => `<th>${etiquetas[c] || c}</th>`).join('') + '</tr>';
+  document.querySelector('#modal-registros-tabla tbody').innerHTML = filas.length
+    ? filas.map(f => '<tr>' + cols.map(c => {
+        if (c === 'created_at') return `<td>${new Date(f.created_at).toLocaleString('es-CO')}</td>`;
+        return `<td>${(f.datos && f.datos[c]) || ''}</td>`;
+      }).join('') + '</tr>').join('')
+    : '';
+
+  registrosActuales = { filas, cols, etiquetas, titulo };
+  document.getElementById('modal-registros').hidden = false;
+}
+
+document.getElementById('btn-cerrar-modal').addEventListener('click', () => {
+  document.getElementById('modal-registros').hidden = true;
+});
+
+document.getElementById('btn-descargar-csv').addEventListener('click', () => {
+  if (!registrosActuales) return;
+  const { filas, cols, etiquetas, titulo } = registrosActuales;
+  const filasCsv = [cols.map(c => etiquetas[c] || c)].concat(
+    filas.map(f => cols.map(c => c === 'created_at' ? new Date(f.created_at).toLocaleString('es-CO') : ((f.datos && f.datos[c]) || '')))
+  );
+  const csv = filasCsv.map(fila => fila.map(v => '"' + String(v).replace(/"/g, '""') + '"').join(',')).join('\r\n');
+  const blob = new Blob([String.fromCharCode(0xFEFF) + csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'inscritos-' + slugify(titulo) + '.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+});
 
 function cargarTallerParaEditar(id){
   const t = talleresCache.find(x => String(x.id) === String(id));
@@ -327,6 +428,7 @@ document.getElementById('form-mc').addEventListener('submit', async (e) => {
 (async () => {
   const session = await window.FUCHSIA.requireAdmin();
   if (!session) return;
+  await cargarConteos();
   listarTalleres(); listarMc();
 })();
 </script>
